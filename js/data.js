@@ -112,66 +112,219 @@ export const peakHoursChart = {
   sessions: [470, 360, 160, 510, 1220, 570, 500, 360, 310, 1300, 2950, 1800, 1400, 1200, 1400, 1650, 830, 390, 1420, 1040, 1350, 1300, 820, 460],
 };
 
-// [pppoeUsername, clientId, name, profile, mobile, walletBalance, expireDate, remainingDaysLabel, hasViewAction]
-export const customers = [
-  ['static_1785143587529', '100192', 'Murad_presidency_Home', 'Static_Default', '01827517700', '0', 'Jul 27, 2026, 03:13 PM', 'Expired (0d ago)', true],
-  ['static_1785133091400', '790565', 'Mr Aaraf', 'Static_Default', '01837304505', '0', 'Jul 27, 2026, 12:18 PM', 'Expired (0d ago)', false],
-  ['static_1785132933260', '791618', 'RAJASTHAN GEC GODOWN_GEC(STATIC)', 'Static_Default', '01821204943', '0', 'Jul 27, 2026, 12:15 PM', 'Expired (0d ago)', false],
-  ['static_1785131242306', '800490', 'Afroza(STATIC)', 'Static_Default', '01812343100', '0', 'Jul 27, 2026, 11:47 AM', 'Expired (1d ago)', false],
-  ['static_1785053777716', '568086', 'Alchemy Software _Biznet', 'Static_Default', '01313406616', '0', 'Jul 26, 2026, 02:16 PM', 'Expired (1d ago)', true],
-];
+// The app's "current time". Every expiry/status label is derived from this so
+// the list and detail views can never disagree about whether an account is
+// live (they used to: the detail page hard-coded "Active" for expired rows).
+export const TODAY = new Date(2026, 6, 28, 10, 0);
 
-// Filler fields shown on the Customer Details page (connection/profile/POC
-// info) that aren't yet tracked per-row in the `customers` table above.
-export const customerDetailFiller = {
-  address: 'Jolsha market… 6 tala…room number – 154 Chittagong.',
-  lat: '0, 0',
-  onuMac: 'VSOL00997759',
-  recentDb: 'N/A',
-  bandwidth: 'N/A',
-  ip: '192.168.54.698',
-  gateway: '192.168.54.697',
+// Connection fields that are the same for every customer in this mock set.
+// Per-customer values below override anything declared here.
+const CONNECTION_DEFAULTS = {
+  connectionType: 'STATIC_IP',
+  bandwidthType: 'Shared',
   subnet: '255.255.255.252',
-  zone: 'N/A',
-  pool: 'N/A',
-  download: 'N/A',
-  upload: 'N/A',
-  duration: '30 days',
-  pocName: 'R2P4jolshamarket2',
-  pocAddr: 'N/A',
-  pocLat: 'N/A',
-  pocLng: 'N/A',
-  pocCreated: 'Jul 7, 2026, 11:57 AM',
+  zone: null,
+  pool: null,
+  downloadMbps: null,
+  uploadMbps: null,
+  durationDays: 30,
+  initialFiberPower: null,
+  cableLength: 0,
+  cableId: null,
+  wifiRouterUsername: null,
+  wifiRouterPassword: null,
+  ipPhoneNo: null,
+  connectedNas: null,
+  recentDb: null,
+  bandwidth: null,
+  manager: 'ISP Manager',
+  managerEmail: 'admin@gmail.com',
+  poc: {
+    name: 'R2P4jolshamarket2',
+    address: null,
+    lat: null,
+    lng: null,
+    createdAt: new Date(2026, 6, 7, 11, 57),
+  },
 };
 
-// [groupTitle, groupIcon, [icon, label, colorTone][]]
-export const quickActionGroups = [
-  ['CUSTOMER', 'user', [
-    ['pencil', 'Edit Customer', 'navy'],
-    ['copy', 'Copy Customer', 'navy'],
-    ['id-card', 'Change PPPOE Username', 'navy'],
-    ['package', 'Change Profile', 'navy'],
-  ]],
-  ['RENEWAL', 'refresh-cw', [
-    ['refresh-cw', 'Cash Renew (Collected)', 'green'],
-    ['refresh-cw', 'Cash Renew (Not Collected)', 'navy'],
-    ['credit-card', 'Wallet Renew', 'green'],
-    ['calendar', 'Extend Expiry Date', 'navy'],
-  ]],
-  ['WALLET', 'wallet', [
-    ['wallet', 'Add Wallet Payment', 'green'],
-    ['wallet', 'Wallet Withdraw', 'amber'],
-    ['scale', 'Adjust Due from Wallet', 'purple'],
-  ]],
-  ['STATUS', 'user', [
-    ['ban', 'Deactivate', 'red'],
-    ['log-out', 'Left Client', 'amber'],
-  ]],
-  ['COMMUNICATION', 'message-square', [
-    ['ticket', 'Create Ticket', 'navy'],
-    ['message-square', 'Send SMS', 'navy'],
-  ]],
-  ['DANGER ZONE', 'triangle-alert', [
-    ['trash-2', 'Delete User', 'red'],
-  ]],
+/**
+ * `null` marks a genuinely unset field. Rendering code shows those greyed out
+ * as "Not set" rather than printing the string "N/A" at full contrast, so real
+ * data stands out from missing data.
+ */
+export const customers = [
+  {
+    ...CONNECTION_DEFAULTS,
+    pppoe: 'static_1785143587529',
+    password: 'static_1785143587529',
+    clientId: '100192',
+    name: 'Murad presidency_Home',
+    profile: 'Static_Default',
+    mobile: '01827517700',
+    wallet: 0,
+    due: 0,
+    price: 1000,
+    expiresAt: new Date(2026, 6, 27, 15, 13),
+    joinedAt: new Date(2026, 6, 27, 15, 13),
+    updatedAt: new Date(2026, 6, 27, 15, 13),
+    lastOnline: null,
+    address: 'Jolsha market… 6 tala…room number – 154 Chittagong.',
+    lat: null,
+    lng: null,
+    onuMac: 'VSOL00997759',
+    ip: '192.168.54.698',
+    gateway: '192.168.54.697',
+    fixedBillingCycle: false,
+    history: { extensions: 0, invoices: 0, renewals: 0, withdrawals: 0, bandwidth: 0, onu: 0, analytics: 0 },
+  },
+  {
+    ...CONNECTION_DEFAULTS,
+    pppoe: 'static_1785133091400',
+    password: 'Ar!7fq2_Ka9',
+    clientId: '790565',
+    name: 'Mr Aaraf',
+    profile: 'Static_Default',
+    mobile: '01837304505',
+    wallet: 0,
+    due: 850,
+    price: 1000,
+    expiresAt: new Date(2026, 6, 27, 12, 18),
+    joinedAt: new Date(2026, 3, 12, 9, 30),
+    updatedAt: new Date(2026, 6, 27, 12, 18),
+    lastOnline: new Date(2026, 6, 27, 21, 42),
+    address: 'House 42, Road 7, Dhanmondi, Dhaka.',
+    lat: 23.7461,
+    lng: 90.376,
+    onuMac: 'VSOL00997760',
+    ip: '192.168.54.702',
+    gateway: '192.168.54.701',
+    fixedBillingCycle: true,
+    history: { extensions: 1, invoices: 4, renewals: 3, withdrawals: 0, bandwidth: 12, onu: 2, analytics: 1 },
+  },
+  {
+    ...CONNECTION_DEFAULTS,
+    pppoe: 'static_1785132933260',
+    password: 'Gd#4mZ1_Rt8',
+    clientId: '791618',
+    name: 'RAJASTHAN GEC GODOWN_GEC(STATIC)',
+    profile: 'Static_Default',
+    mobile: '01821204943',
+    wallet: 0,
+    due: 0,
+    price: 1000,
+    expiresAt: new Date(2026, 6, 27, 12, 15),
+    joinedAt: new Date(2026, 1, 3, 14, 5),
+    updatedAt: new Date(2026, 6, 27, 12, 15),
+    lastOnline: new Date(2026, 6, 26, 18, 3),
+    address: 'GEC Circle, Chittagong.',
+    lat: 22.3585,
+    lng: 91.8214,
+    onuMac: 'VSOL00997761',
+    ip: '192.168.54.706',
+    gateway: '192.168.54.705',
+    fixedBillingCycle: false,
+    history: { extensions: 0, invoices: 6, renewals: 5, withdrawals: 1, bandwidth: 30, onu: 4, analytics: 1 },
+  },
+  {
+    ...CONNECTION_DEFAULTS,
+    pppoe: 'static_1785131242306',
+    password: 'Nb@8vC3_Ye5',
+    clientId: '800490',
+    name: 'Afroza(STATIC)',
+    profile: 'Static_Default',
+    mobile: '01812343100',
+    wallet: 250,
+    due: 1200,
+    price: 1000,
+    expiresAt: new Date(2026, 6, 27, 11, 47),
+    joinedAt: new Date(2025, 10, 18, 10, 20),
+    updatedAt: new Date(2026, 6, 27, 11, 47),
+    lastOnline: new Date(2026, 6, 27, 8, 12),
+    address: 'Lalkhan Bazar, Chittagong.',
+    lat: 22.3419,
+    lng: 91.8132,
+    onuMac: 'VSOL00997762',
+    ip: '192.168.54.710',
+    gateway: '192.168.54.709',
+    fixedBillingCycle: false,
+    history: { extensions: 2, invoices: 9, renewals: 8, withdrawals: 2, bandwidth: 45, onu: 6, analytics: 1 },
+  },
+  {
+    ...CONNECTION_DEFAULTS,
+    pppoe: 'static_1785053777716',
+    password: 'Qw$5tB7_Lm2',
+    clientId: '568086',
+    name: 'Alchemy Software _Biznet',
+    profile: 'Static_Default',
+    mobile: '01313406616',
+    wallet: 3400,
+    due: 0,
+    price: 1000,
+    expiresAt: new Date(2026, 7, 26, 14, 16),
+    joinedAt: new Date(2025, 5, 1, 11, 0),
+    updatedAt: new Date(2026, 6, 26, 14, 16),
+    lastOnline: new Date(2026, 6, 28, 9, 51),
+    address: 'Agrabad C/A, Chittagong.',
+    lat: 22.3269,
+    lng: 91.8043,
+    onuMac: 'VSOL00997763',
+    ip: '192.168.54.714',
+    gateway: '192.168.54.713',
+    fixedBillingCycle: true,
+    history: { extensions: 1, invoices: 14, renewals: 13, withdrawals: 3, bandwidth: 90, onu: 8, analytics: 1 },
+  },
+];
+
+// Actions the operator reaches for constantly — always visible, never buried.
+export const primaryActions = [
+  { id: 'renew', icon: 'refresh-cw', label: 'Renew', variant: 'primary' },
+  { id: 'add-payment', icon: 'wallet', label: 'Add Payment', variant: 'success' },
+];
+
+/**
+ * Everything else, grouped by intent. `variant` encodes *consequence*, not
+ * decoration: neutral = routine, success = money in, warning = reversible
+ * risk, danger = destructive.
+ */
+export const actionGroups = [
+  {
+    title: 'Billing',
+    icon: 'wallet',
+    actions: [
+      { id: 'cash-renew', icon: 'refresh-cw', label: 'Cash Renew', variant: 'neutral' },
+      { id: 'wallet-renew', icon: 'credit-card', label: 'Wallet Renew', variant: 'neutral' },
+      { id: 'extend-expiry', icon: 'calendar', label: 'Extend Expiry', variant: 'neutral' },
+      { id: 'wallet-withdraw', icon: 'wallet', label: 'Wallet Withdraw', variant: 'warning' },
+      { id: 'adjust-due', icon: 'scale', label: 'Adjust Due', variant: 'warning' },
+    ],
+  },
+  {
+    title: 'Account',
+    icon: 'user',
+    actions: [
+      { id: 'edit', icon: 'pencil', label: 'Edit Customer', variant: 'neutral' },
+      { id: 'copy-customer', icon: 'copy', label: 'Duplicate', variant: 'neutral' },
+      { id: 'change-pppoe', icon: 'id-card', label: 'Change PPPoE', variant: 'neutral' },
+      { id: 'change-profile', icon: 'package', label: 'Change Profile', variant: 'neutral' },
+    ],
+  },
+  {
+    title: 'Support',
+    icon: 'message-square',
+    actions: [
+      { id: 'create-ticket', icon: 'ticket', label: 'Create Ticket', variant: 'neutral' },
+      { id: 'send-sms', icon: 'message-square', label: 'Send SMS', variant: 'neutral' },
+    ],
+  },
+  {
+    title: 'Danger zone',
+    icon: 'triangle-alert',
+    danger: true,
+    actions: [
+      { id: 'deactivate', icon: 'ban', label: 'Deactivate', variant: 'danger' },
+      { id: 'left-client', icon: 'log-out', label: 'Mark as Left', variant: 'warning' },
+      { id: 'delete', icon: 'trash-2', label: 'Delete User', variant: 'danger' },
+    ],
+  },
 ];

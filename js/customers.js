@@ -2,6 +2,7 @@
 
 import { icon, inlineMiniIcons } from './icons.js';
 import { customers } from './data.js';
+import { customerStatus, formatDateTime, formatCurrency } from './format.js';
 
 const statusFilters = ['All Customers', 'Active', 'Online', 'Offline', 'Deactivated', 'Expiring Soon', 'Expired', 'Left', 'Blocked'];
 
@@ -13,27 +14,27 @@ function renderToolbarButtons() {
 }
 
 function renderCustomerRow(customer, index) {
-  const [pppoeUsername, clientId, name, profile, mobile, walletBalance, expireDate, remainingDays, hasViewAction] = customer;
+  const status = customerStatus(customer);
   return `
     <tr>
       <td><input type="checkbox"></td>
       <td>${index + 1}</td>
       <td>
         <div class="pppoe-cell">
-          <b>●</b>
-          <div><a href="#" class="pppoe-link">${pppoeUsername}</a><small>${pppoeUsername}</small></div>
+          <b class="dot-status dot-status--${status.tone}"></b>
+          <div><a href="#" class="pppoe-link">${customer.pppoe}</a><small>Client ${customer.clientId}</small></div>
         </div>
       </td>
-      <td>${clientId}</td>
-      <td>${name}</td>
-      <td>${profile}</td>
-      <td>${mobile}</td>
-      <td>${walletBalance}</td>
-      <td class="orange">${expireDate}</td>
-      <td><span class="chip red-chip">${remainingDays}</span></td>
-      <td class="muted">N/A</td>
+      <td>${customer.clientId}</td>
+      <td>${customer.name}</td>
+      <td>${customer.profile}</td>
+      <td>${customer.mobile}</td>
+      <td>${formatCurrency(customer.wallet)}</td>
+      <td class="${status.key === 'active' ? '' : 'orange'}">${formatDateTime(customer.expiresAt)}</td>
+      <td><span class="chip chip--${status.tone}">${status.detail}</span></td>
+      <td class="muted">${customer.lastOnline ? formatDateTime(customer.lastOnline) : 'Never'}</td>
       <td>
-        ${hasViewAction ? `<button class="btn-view">${icon('eye', 15)} View</button>` : ''}
+        <button class="btn-view">${icon('eye', 15)} View</button>
         <button class="btn-edit">${icon('pencil', 15)} Edit</button>
       </td>
     </tr>`;

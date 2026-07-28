@@ -10,6 +10,8 @@ import { renderCustomersPage } from './customers.js';
 import { renderCustomerDetailPage } from './customerDetail.js';
 
 function navigate(label) {
+  window.scrollTo(0, 0);
+
   if (label === 'Dashboard Analytics') {
     renderDashboardPage(content);
   } else if (label === 'Customers') {
@@ -20,7 +22,8 @@ function navigate(label) {
 }
 
 function openCustomer(customer) {
-  renderCustomerDetailPage(content, customer);
+  window.scrollTo(0, 0);
+  renderCustomerDetailPage(content, customer, navigate);
 }
 
 const content = renderShell(navigate);
