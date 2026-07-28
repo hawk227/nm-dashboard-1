@@ -126,7 +126,7 @@ main {
 
 .logo {
   display: block;
-  width: 174px;
+  width: 140px;
   height: auto;
   object-fit: contain;
   margin: 6px 0 13px;
@@ -755,7 +755,7 @@ header {
 /* Measured 2048 x 1123 desktop reference geometry */
 @media (min-width: 1600px) {
   .sidebar { width: 334px; flex-basis: 334px; padding: 16px 28px; }
-  .logo { width: 240px; margin: 8px 0 18px; }
+  .logo { width: 194px; margin: 8px 0 18px; }
   .nav-label { font-size: 14px; margin: 8px 0 14px; }
   .nav-label.second { margin-top: 39px; }
   nav a { height: 55px; font-size: 16px; gap: 17px; padding: 0 12px; border-radius: 11px; }
