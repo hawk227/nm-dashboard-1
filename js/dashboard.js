@@ -20,8 +20,16 @@ const zeroClass = (value) => (/^৳?0(\.00)?$/.test(String(value).trim()) ? ' is
 // Needs Attention — the only section that says "do something", so it leads.
 // ---------------------------------------------------------------------------
 
+/** Collapse state persists across re-renders within the session. */
+let attentionOpen = false;
+
 function renderNeedsAttention() {
   const total = attentionGroups.reduce((sum, [, , , rows]) => sum + rows.length, 0);
+  // The summary stays in the header, so a collapsed panel still says whether
+  // it is worth opening.
+  const summary = attentionGroups
+    .map(([title, , , rows]) => `${rows.length} ${title.toLowerCase()}`)
+    .join(' · ');
 
   const columns = attentionGroups.map(([title, tone, filter, rows]) => `
     <div class="attn-col">
@@ -41,15 +49,18 @@ function renderNeedsAttention() {
     </div>`).join('');
 
   return `
-    <section class="card attn-panel">
-      <div class="attn-panel__head">
+    <section class="card attn-panel${attentionOpen ? ' is-open' : ''}">
+      <button class="attn-panel__head" id="attn-toggle" aria-expanded="${attentionOpen}" aria-controls="attn-grid">
         <div>
           <h2>${icon('triangle-alert', 18)} Needs attention</h2>
-          <p>Accounts waiting on someone right now</p>
+          <p>${summary}</p>
         </div>
-        <span class="pill pill--danger">${total} items</span>
-      </div>
-      <div class="attn-grid">${columns}</div>
+        <span class="attn-panel__meta">
+          <span class="pill pill--danger">${total} items</span>
+          <b class="chevron">${icon('chevron-down', 18)}</b>
+        </span>
+      </button>
+      <div class="attn-grid" id="attn-grid" ${attentionOpen ? '' : 'hidden'}>${columns}</div>
     </section>`;
 }
 
@@ -202,6 +213,15 @@ export function renderDashboardPage(content, onOpenCustomers = () => {}) {
     ${renderFinancialOverview()}`;
 
   inlineMiniIcons(content);
+
+  const attnToggle = content.querySelector('#attn-toggle');
+  const attnGrid = content.querySelector('#attn-grid');
+  attnToggle.onclick = () => {
+    attentionOpen = !attentionOpen;
+    attnGrid.hidden = !attentionOpen;
+    attnToggle.setAttribute('aria-expanded', String(attentionOpen));
+    attnToggle.closest('.attn-panel').classList.toggle('is-open', attentionOpen);
+  };
 
   content.querySelector('#month-toggle').onclick = () => {
     const menu = content.querySelector('#month-menu');

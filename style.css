@@ -69,6 +69,10 @@ nav a.active .mini-icon { color: #fff; }
   box-sizing: border-box;
 }
 
+/* A class-level `display` beats the UA stylesheet's `[hidden] { display: none }`,
+   which silently leaves elements visible. Enforce the attribute globally. */
+[hidden] { display: none !important; }
+
 body {
   margin: 0;
   min-width: 1180px;
@@ -1631,8 +1635,26 @@ header {
 /* ==========================================================================
    Needs attention — leads the dashboard, full width
    ========================================================================== */
-.attn-panel { padding: 20px 24px 22px; margin-bottom: 18px; border-left: 3px solid var(--color-warning); }
-.attn-panel__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.attn-panel { padding: 18px 24px; margin-bottom: 18px; border-left: 3px solid var(--color-warning); }
+.attn-panel.is-open { padding-bottom: 22px; }
+.attn-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.attn-panel.is-open .attn-panel__head { margin-bottom: 16px; }
+.attn-panel__meta { display: inline-flex; align-items: center; gap: 12px; }
+.attn-panel__meta .chevron { display: inline-grid; color: var(--text-muted); transition: transform .15s; }
+.attn-panel.is-open .attn-panel__meta .chevron { transform: rotate(180deg); }
 .attn-panel__head h2 { display: flex; align-items: center; gap: 9px; font-size: 17px; }
 .attn-panel__head h2 .mini-icon { color: var(--color-warning-dark); }
 .attn-panel__head p { margin-top: 4px; font-size: 12.5px; }
