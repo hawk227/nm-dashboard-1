@@ -943,19 +943,12 @@ header {
 .show-select { border: 1px solid var(--color-border-strong); border-radius: var(--radius-md); padding: 8px 10px; font-size: 12.5px; color: #2a3444; }
 
 .table-card { padding: 0; position: relative; }
-.table-scroll { overflow-x: auto; position: relative; scrollbar-width: thin; }
-.table-card::after {
-  content: "";
-  position: absolute;
-  top: 1px;
-  right: 1px;
-  bottom: 1px;
-  width: 36px;
-  border-radius: 0 20px 20px 0;
-  background: linear-gradient(to right, transparent, #fff 85%);
-  pointer-events: none;
+.table-scroll {
+  overflow: auto;
+  max-height: calc(100vh - 200px);
+  position: relative;
+  scrollbar-width: thin;
 }
-
 .table-footer {
   display: flex;
   justify-content: space-between;
@@ -979,21 +972,78 @@ header {
 .table-footer .page-btn.active { background: #173a66; border-color: #173a66; color: #fff; }
 .table-footer .page-btn:disabled { opacity: .4; cursor: not-allowed; }
 
-.customer-table { border-collapse: collapse; width: 100%; font-size: 12.5px; white-space: nowrap; }
-.customer-table thead { background: #f6f8fb; }
+.customer-table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 12.5px; white-space: nowrap; }
 .customer-table th {
   text-align: left;
-  padding: 14px 18px;
+  padding: 12px 12px;
   font-weight: 800;
   color: #2a3444;
+  background: #f6f8fb;
   border-bottom: 1px solid #edf0f4;
+  /* Column labels survive scrolling of the table region. */
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
-.customer-table td { padding: 16px 18px; border-bottom: 1px solid #f0f2f6; color: var(--text-body); }
+.customer-table td {
+  padding: 12px 12px;
+  border-bottom: 1px solid #f0f2f6;
+  color: var(--text-body);
+  background: var(--color-surface);
+}
 
-.pppoe-cell { display: flex; align-items: center; gap: 8px; }
-.pppoe-cell b { color: var(--text-faint); font-size: 9px; }
-.pppoe-cell small { display: block; color: var(--text-faint); font-size: 11px; margin-top: 2px; }
-.pppoe-link { color: #d98a2b; text-decoration: none; font-weight: 700; }
+/* Column sizing. Widths are hints; the merged cells are what actually keeps
+   the table inside the viewport. */
+.col-check   { width: 40px; }
+.col-sl      { width: 44px; color: var(--text-faint); }
+.col-customer { width: 248px; }
+.col-money   { width: 112px; }
+.col-expiry  { width: 158px; }
+.col-actions { width: 148px; }
+
+/* Identity and actions stay put when the middle columns scroll, so a row is
+   never reduced to anonymous numbers. */
+.col-check, .col-sl, .col-customer { position: sticky; z-index: 1; }
+.customer-table thead .col-check,
+.customer-table thead .col-sl,
+.customer-table thead .col-customer { z-index: 3; }
+.col-check { left: 0; }
+.col-sl { left: 40px; }
+.col-customer { left: 84px; box-shadow: inset -1px 0 0 var(--color-border); }
+.col-actions { position: sticky; right: 0; z-index: 1; box-shadow: inset 1px 0 0 var(--color-border); }
+.customer-table thead .col-actions { z-index: 3; }
+
+/* Identity cell: name leads, machine identifiers follow underneath. */
+.cust-cell { display: flex; align-items: center; gap: 9px; }
+.cust-cell__text { min-width: 0; }
+.cust-cell__name {
+  display: block;
+  color: var(--text-heading);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cust-cell__name:hover { color: var(--color-primary); text-decoration: underline; }
+.cust-cell__ids {
+  display: block;
+  color: var(--text-faint);
+  font-size: 11px;
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cust-cell__ids .dot { color: var(--color-border-strong); }
+.cust-cell .dot-status { flex: 0 0 8px; }
+
+/* Expiry and balance cells stack their two values. */
+.col-expiry b, .col-money b { display: block; font-weight: 700; margin-bottom: 4px; }
+.col-expiry .chip { font-size: 10.5px; padding: 3px 8px; }
+.cell-due { display: block; color: #b53f3a; font-weight: 700; font-size: 11px; }
+
+.link-quiet { color: var(--text-body); text-decoration: none; }
+.link-quiet:hover { color: var(--color-info); text-decoration: underline; }
 
 .orange { color: #d98a2b; font-weight: 700; }
 .muted { color: var(--text-faint); }

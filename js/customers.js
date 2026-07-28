@@ -2,7 +2,7 @@
 
 import { icon, inlineMiniIcons } from './icons.js';
 import { customers } from './data.js';
-import { customerStatus, formatDateTime, formatCurrency } from './format.js';
+import { customerStatus, formatDateTime, formatCurrency, timeAgo } from './format.js';
 
 const statusFilters = ['All Customers', 'Active', 'Online', 'Offline', 'Deactivated', 'Expiring Soon', 'Expired', 'Left', 'Blocked'];
 
@@ -13,27 +13,47 @@ function renderToolbarButtons() {
     <button class="btn-outline">${icon('arrow-left-right', 15)} Import Customers</button>`;
 }
 
+/**
+ * One row. Related fields share a cell rather than each claiming a column:
+ * the identity cell carries name + PPPoE + client ID, and the expiry cell
+ * carries the date + how long is left. Every value stays on screen — only
+ * the column count drops, which is what keeps the table inside the viewport.
+ */
 function renderCustomerRow(customer, index) {
   const status = customerStatus(customer);
   return `
     <tr>
-      <td><input type="checkbox"></td>
-      <td>${index + 1}</td>
-      <td>
-        <div class="pppoe-cell">
-          <b class="dot-status dot-status--${status.tone}"></b>
-          <div><a href="#" class="pppoe-link">${customer.pppoe}</a><small>Client ${customer.clientId}</small></div>
+      <td class="col-check"><input type="checkbox" aria-label="Select ${customer.name}"></td>
+      <td class="col-sl">${index + 1}</td>
+
+      <td class="col-customer">
+        <div class="cust-cell">
+          <span class="dot-status dot-status--${status.tone}" title="${status.label}"></span>
+          <div class="cust-cell__text">
+            <a href="#" class="cust-cell__name">${customer.name}</a>
+            <small class="cust-cell__ids">${customer.pppoe} <span class="dot">·</span> Client ${customer.clientId}</small>
+          </div>
         </div>
       </td>
-      <td>${customer.clientId}</td>
-      <td>${customer.name}</td>
+
       <td>${customer.profile}</td>
-      <td>${customer.mobile}</td>
-      <td>${formatCurrency(customer.wallet)}</td>
-      <td class="${status.key === 'active' ? '' : 'orange'}">${formatDateTime(customer.expiresAt)}</td>
-      <td><span class="chip chip--${status.tone}">${status.detail}</span></td>
-      <td class="muted">${customer.lastOnline ? formatDateTime(customer.lastOnline) : 'Never'}</td>
-      <td>
+      <td><a class="link-quiet" href="tel:${customer.mobile}">${customer.mobile}</a></td>
+
+      <td class="col-money">
+        <b>${formatCurrency(customer.wallet)}</b>
+        ${customer.due > 0 ? `<small class="cell-due">Due ${formatCurrency(customer.due)}</small>` : ''}
+      </td>
+
+      <td class="col-expiry">
+        <b>${formatDateTime(customer.expiresAt)}</b>
+        <span class="chip chip--${status.tone}">${status.detail}</span>
+      </td>
+
+      <td class="muted">${customer.lastOnline
+        ? `<span title="${formatDateTime(customer.lastOnline)}">${timeAgo(customer.lastOnline)}</span>`
+        : 'Never'}</td>
+
+      <td class="col-actions">
         <button class="btn-view">${icon('eye', 15)} View</button>
         <button class="btn-edit">${icon('pencil', 15)} Edit</button>
       </td>
@@ -83,18 +103,15 @@ export function renderCustomersPage(content, onOpenCustomer) {
         <table class="customer-table">
           <thead>
             <tr>
-              <th><input type="checkbox"></th>
-              <th>SL</th>
-              <th>PPPoE Username ⇅</th>
-              <th>Client ID ⇅</th>
-              <th>Customer Name ⇅</th>
+              <th class="col-check"><input type="checkbox" aria-label="Select all rows"></th>
+              <th class="col-sl">SL</th>
+              <th class="col-customer">Customer ⇅</th>
               <th>Profile</th>
               <th>Mobile ⇅</th>
-              <th>Wallet Balance ⇅</th>
-              <th>Expire Date ⇅</th>
-              <th>Remaining Days</th>
+              <th class="col-money">Wallet / Due ⇅</th>
+              <th class="col-expiry">Expire Date ⇅</th>
               <th>Last Online</th>
-              <th>Remarks</th>
+              <th class="col-actions">Actions</th>
             </tr>
           </thead>
           <tbody>${customers.map(renderCustomerRow).join('')}</tbody>
@@ -122,7 +139,7 @@ export function renderCustomersPage(content, onOpenCustomer) {
     seg.classList.add('active');
   });
 
-  content.querySelectorAll('.btn-view, .pppoe-link').forEach((el) => el.onclick = (event) => {
+  content.querySelectorAll('.btn-view, .cust-cell__name').forEach((el) => el.onclick = (event) => {
     event.preventDefault();
     const row = el.closest('tr');
     const rowIndex = [...row.parentNode.children].indexOf(row);
