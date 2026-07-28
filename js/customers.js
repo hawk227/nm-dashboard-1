@@ -2,9 +2,16 @@
 
 import { icon, inlineMiniIcons } from './icons.js';
 import { customers } from './data.js';
-import { customerStatus, formatDateTime, formatCurrency, timeAgo } from './format.js';
+import {
+  customerStatus, formatDateTime, formatCurrency, timeAgo,
+  matchesFilter, customerFilters,
+} from './format.js';
+import { loadingRows, emptyState, errorState } from './states.js';
 
-const statusFilters = ['All Customers', 'Active', 'Online', 'Offline', 'Deactivated', 'Expiring Soon', 'Expired', 'Left', 'Blocked'];
+/** Stands in for the API call this page will eventually make. */
+function fetchCustomers() {
+  return new Promise((resolve) => setTimeout(() => resolve(customers), 180));
+}
 
 function renderToolbarButtons() {
   return `
@@ -40,7 +47,7 @@ function renderCustomerRow(customer, index) {
       <td><a class="link-quiet" href="tel:${customer.mobile}">${customer.mobile}</a></td>
 
       <td class="col-money">
-        <b>${formatCurrency(customer.wallet)}</b>
+        <b class="${customer.wallet === 0 ? 'is-zero' : ''}">${formatCurrency(customer.wallet)}</b>
         ${customer.due > 0 ? `<small class="cell-due">Due ${formatCurrency(customer.due)}</small>` : ''}
       </td>
 
@@ -60,12 +67,31 @@ function renderCustomerRow(customer, index) {
     </tr>`;
 }
 
+const TABLE_HEAD = `
+  <thead>
+    <tr>
+      <th class="col-check"><input type="checkbox" aria-label="Select all rows"></th>
+      <th class="col-sl">SL</th>
+      <th class="col-customer">Customer ⇅</th>
+      <th>Profile</th>
+      <th>Mobile ⇅</th>
+      <th class="col-money">Wallet / Due ⇅</th>
+      <th class="col-expiry">Expire Date ⇅</th>
+      <th>Last Online</th>
+      <th class="col-actions">Actions</th>
+    </tr>
+  </thead>`;
+
 /**
  * @param {HTMLElement} content
- * @param {(customer: Array) => void} onOpenCustomer called with the full
- *   customer record when a row's View button or username link is clicked.
+ * @param {(customer: object) => void} onOpenCustomer
+ * @param {string} [initialFilter] filter key to open with, so dashboard
+ *   figures can link straight to the subset they describe.
  */
-export function renderCustomersPage(content, onOpenCustomer) {
+export function renderCustomersPage(content, onOpenCustomer, initialFilter = 'all') {
+  let activeFilter = customerFilters.some((f) => f.key === initialFilter) ? initialFilter : 'all';
+  let rows = [];
+
   content.innerHTML = `
     <div class="page-banner">
       <div><h1>Customers</h1><p class="crumb">Dashboard <b>•</b> Customers</p></div>
@@ -82,13 +108,13 @@ export function renderCustomersPage(content, onOpenCustomer) {
         <button class="seg-btn">${icon('globe', 16)} All Customers</button>
       </div>
       <div class="pill-row">
-        ${statusFilters.map((label, i) => `<button class="pill${i === 0 ? ' active' : ''}">${label}</button>`).join('')}
+        ${customerFilters.map((f) => `<button class="pill${f.key === activeFilter ? ' active' : ''}" data-filter="${f.key}">${f.label}</button>`).join('')}
         <button class="pill pill-advanced">${icon('sliders-horizontal', 15)} Advanced ⌄</button>
       </div>
     </section>
 
     <section class="card table-toolbar">
-      <input class="table-search" placeholder="Search…">
+      <input class="table-search" placeholder="Search name, username, mobile…">
       <div class="toolbar-right">
         <span class="show-label">Show:</span>
         <select class="show-select"><option>10</option><option>25</option><option>50</option></select>
@@ -99,39 +125,82 @@ export function renderCustomersPage(content, onOpenCustomer) {
     </section>
 
     <section class="card table-card">
-      <div class="table-scroll">
-        <table class="customer-table">
-          <thead>
-            <tr>
-              <th class="col-check"><input type="checkbox" aria-label="Select all rows"></th>
-              <th class="col-sl">SL</th>
-              <th class="col-customer">Customer ⇅</th>
-              <th>Profile</th>
-              <th>Mobile ⇅</th>
-              <th class="col-money">Wallet / Due ⇅</th>
-              <th class="col-expiry">Expire Date ⇅</th>
-              <th>Last Online</th>
-              <th class="col-actions">Actions</th>
-            </tr>
-          </thead>
-          <tbody>${customers.map(renderCustomerRow).join('')}</tbody>
-        </table>
-      </div>
-      <div class="table-footer">
-        <span>Showing 1 to ${customers.length} of ${customers.length} entries</span>
-        <div>
-          <button class="page-btn" disabled>Prev</button>
-          <button class="page-btn active">1</button>
-          <button class="page-btn" disabled>Next</button>
-        </div>
-      </div>
+      <div class="table-scroll"></div>
+      <div class="table-footer" hidden></div>
     </section>`;
 
   inlineMiniIcons(content);
 
-  content.querySelectorAll('.pill').forEach((pill) => pill.onclick = () => {
-    content.querySelectorAll('.pill').forEach((p) => p.classList.remove('active'));
-    pill.classList.add('active');
+  const scroll = content.querySelector('.table-scroll');
+  const footer = content.querySelector('.table-footer');
+  const search = content.querySelector('.table-search');
+
+  function visibleRows() {
+    const term = search.value.trim().toLowerCase();
+    return rows.filter((customer) => {
+      if (!matchesFilter(customer, activeFilter)) return false;
+      if (!term) return true;
+      return [customer.name, customer.pppoe, customer.clientId, customer.mobile]
+        .some((value) => String(value).toLowerCase().includes(term));
+    });
+  }
+
+  function bindStateActions() {
+    scroll.querySelectorAll('[data-state-action="clear-filters"]').forEach((button) => button.onclick = () => {
+      activeFilter = 'all';
+      search.value = '';
+      content.querySelectorAll('.pill[data-filter]').forEach((p) => p.classList.toggle('active', p.dataset.filter === 'all'));
+      paint();
+    });
+    scroll.querySelectorAll('[data-state-action="retry"]').forEach((button) => button.onclick = load);
+  }
+
+  function bindRowActions() {
+    const shown = visibleRows();
+    scroll.querySelectorAll('.btn-view, .cust-cell__name').forEach((el) => el.onclick = (event) => {
+      event.preventDefault();
+      const row = el.closest('tr');
+      onOpenCustomer(shown[[...row.parentNode.children].indexOf(row)]);
+    });
+  }
+
+  function paint() {
+    const shown = visibleRows();
+    const narrowed = activeFilter !== 'all' || search.value.trim() !== '';
+
+    if (!shown.length) {
+      scroll.innerHTML = `<table class="customer-table">${TABLE_HEAD}</table>${emptyState({
+        iconName: 'users',
+        title: narrowed ? 'No customers match' : 'No customers yet',
+        message: narrowed
+          ? 'Nothing matches the current filter and search. Try widening either.'
+          : 'Once customers are added they will appear here.',
+        actionLabel: narrowed ? 'Clear filters' : null,
+        actionId: 'clear-filters',
+      })}`;
+      footer.hidden = true;
+      inlineMiniIcons(scroll);
+      bindStateActions();
+      return;
+    }
+
+    scroll.innerHTML = `<table class="customer-table">${TABLE_HEAD}<tbody>${shown.map(renderCustomerRow).join('')}</tbody></table>`;
+    footer.hidden = false;
+    footer.innerHTML = `
+      <span>Showing 1 to ${shown.length} of ${shown.length} entries${shown.length !== rows.length ? ` — filtered from ${rows.length}` : ''}</span>
+      <div>
+        <button class="page-btn" disabled>Prev</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn" disabled>Next</button>
+      </div>`;
+    inlineMiniIcons(scroll);
+    bindRowActions();
+  }
+
+  content.querySelectorAll('.pill[data-filter]').forEach((pill) => pill.onclick = () => {
+    activeFilter = pill.dataset.filter;
+    content.querySelectorAll('.pill[data-filter]').forEach((p) => p.classList.toggle('active', p === pill));
+    paint();
   });
 
   content.querySelectorAll('.seg-btn').forEach((seg) => seg.onclick = () => {
@@ -139,10 +208,20 @@ export function renderCustomersPage(content, onOpenCustomer) {
     seg.classList.add('active');
   });
 
-  content.querySelectorAll('.btn-view, .cust-cell__name').forEach((el) => el.onclick = (event) => {
-    event.preventDefault();
-    const row = el.closest('tr');
-    const rowIndex = [...row.parentNode.children].indexOf(row);
-    onOpenCustomer(customers[rowIndex]);
-  });
+  search.addEventListener('input', paint);
+
+  async function load() {
+    scroll.innerHTML = `<table class="customer-table">${TABLE_HEAD}${loadingRows()}</table>`;
+    footer.hidden = true;
+    try {
+      rows = await fetchCustomers();
+      paint();
+    } catch {
+      scroll.innerHTML = errorState({ message: 'The customer list could not be reached.' });
+      inlineMiniIcons(scroll);
+      bindStateActions();
+    }
+  }
+
+  load();
 }

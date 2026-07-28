@@ -781,7 +781,7 @@ header {
   .stat em { font-size: 15px; }
   .stat small { font-size: 14px; padding-top: 16px; }
   .dashboard-grid { grid-template-columns: 1.5fr 1fr; gap: 24px; }
-  .client-card { height: 517px; padding: 34px; border-radius: 15px; }
+  .client-card { padding: 28px; border-radius: 15px; }
   .totals { font-size: 15px; margin-top: 19px; }
   .client-grid { gap: 17px; margin-top: 25px; }
   .client-stat { min-height: 164px; padding: 25px 22px; border-radius: 13px; }
@@ -789,7 +789,6 @@ header {
   .client-stat strong { font-size: 37px; margin: 13px 0 16px; }
   .client-stat em { font-size: 15px; }
   .client-stat small { font-size: 13px; line-height: 19px; }
-  .attention { height: 517px; border-radius: 15px; }
   .attention-title { padding: 30px 33px 18px; }
   .attention-title > b { font-size: 13px; padding: 7px 14px; }
   .attention-group { padding: 19px 33px 0; }
@@ -812,10 +811,9 @@ header {
 /* The supplied comparison is a 1280 CSS-pixel desktop capture at 2x density */
 @media (min-width: 1000px) and (max-width: 1599px) {
   .dashboard-grid { grid-template-columns: 1.5fr 1fr; gap: 16px; }
-  .client-card { height: 426px; padding: 24px; }
-  .attention { height: 426px; }
-  .client-grid { grid-template-rows: 148px 148px; gap: 16px; margin-top: 17px; }
-  .client-stat { height: 148px; min-height: 0; padding: 18px 16px; }
+  .client-card { padding: 22px; }
+  .client-grid { gap: 14px; margin-top: 15px; }
+  .client-stat { min-height: 0; padding: 16px; }
   .client-stat > span { display: block; }
   .client-stat strong { margin: 9px 0 0; vertical-align: baseline; }
   .client-stat em { display: inline-block; vertical-align: baseline; }
@@ -1585,3 +1583,201 @@ header {
   z-index: 20;
   box-shadow: 0 8px 24px #1e315733;
 }
+
+/* ==========================================================================
+   Zero states — a figure of zero is the absence of news, so it recedes
+   rather than competing with figures that carry information.
+   ========================================================================== */
+.is-zero { color: var(--text-faint) !important; font-weight: 600 !important; }
+
+/* ==========================================================================
+   Loading / empty / error panels
+   ========================================================================== */
+.skeleton td { padding: 14px 12px; }
+.skeleton-bar {
+  display: block;
+  height: 11px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #eef1f5 25%, #f7f9fb 50%, #eef1f5 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite linear;
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+.state-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 56px 24px;
+  text-align: center;
+}
+.state-panel__icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #f1f4f8;
+  margin-bottom: 2px;
+}
+.state-panel__icon .mini-icon { color: var(--text-faint); }
+.state-panel h3 { font-size: 15px; }
+.state-panel p { font-size: 13px; color: var(--text-muted); max-width: 44ch; margin: 0; }
+.state-panel .btn { margin-top: 6px; }
+.state-panel--error .state-panel__icon { background: #fdecec; }
+.state-panel--error .state-panel__icon .mini-icon { color: var(--color-danger-dark); }
+
+/* ==========================================================================
+   Needs attention — leads the dashboard, full width
+   ========================================================================== */
+.attn-panel { padding: 20px 24px 22px; margin-bottom: 18px; border-left: 3px solid var(--color-warning); }
+.attn-panel__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.attn-panel__head h2 { display: flex; align-items: center; gap: 9px; font-size: 17px; }
+.attn-panel__head h2 .mini-icon { color: var(--color-warning-dark); }
+.attn-panel__head p { margin-top: 4px; font-size: 12.5px; }
+
+.attn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.attn-col { border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 14px; }
+.attn-col__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.attn-col__count { font-size: 12px; font-weight: 800; color: var(--text-faint); }
+
+.attn-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid #f3f5f8;
+}
+.attn-item:last-of-type { border-bottom: 0; }
+.attn-item b { display: block; font-size: 12.5px; }
+.attn-item small { display: block; font-size: 11px; color: var(--text-faint); margin-top: 2px; }
+
+.attn-col__all {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 0;
+  padding: 8px 0 0;
+  font: 700 12px var(--font-base);
+  color: var(--color-primary);
+  cursor: pointer;
+}
+.attn-col__all:hover { text-decoration: underline; }
+.attn-col__all .mini-icon { color: currentColor; }
+
+/* ==========================================================================
+   Figures that link to the set they describe
+   ========================================================================== */
+.stat--link, .client-stat--link {
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  width: 100%;
+  transition: border-color .12s, box-shadow .12s, transform .12s;
+}
+.stat--link:hover, .client-stat--link:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 14px #1c4c8518;
+}
+.stat--link:active, .client-stat--link:active { transform: translateY(1px); }
+.stat--link small .mini-icon,
+.client-stat--link small .mini-icon { color: var(--color-primary); vertical-align: -2px; }
+.stat--link:focus-visible, .client-stat--link:focus-visible { outline: 2px solid var(--color-info); outline-offset: 2px; }
+
+/* ==========================================================================
+   Profit breakdown table — replaces four cards of `X − 0 = X`
+   ========================================================================== */
+.breakdown-table-wrap { padding: 0; overflow: hidden; }
+.breakdown-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.breakdown-table th {
+  text-align: left;
+  padding: 12px 18px;
+  background: #f6f8fb;
+  font-weight: 800;
+  color: #2a3444;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 12px;
+}
+.breakdown-table td { padding: 13px 18px; border-bottom: 1px solid #f3f5f8; }
+.breakdown-table tr:last-child td { border-bottom: 0; }
+.breakdown-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.breakdown-table .num--total { font-weight: 800; color: var(--color-primary-dark); }
+.breakdown__source { font-weight: 700; white-space: nowrap; }
+.breakdown__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: #f1f7ff;
+  margin-right: 8px;
+  vertical-align: -8px;
+}
+.breakdown__icon .mini-icon { color: var(--color-primary-dark); }
+.breakdown__icon.green { background: #effcf5; }
+.breakdown__icon.green .mini-icon { color: #25c87b; }
+
+/* ==========================================================================
+   Bandwidth bars — one hue; length already encodes the value, so colour
+   no longer varies arbitrarily per row.
+   ========================================================================== */
+.bar { background: var(--color-primary) !important; }
+
+/* Chart legend + hover readout */
+.legend__swatch {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  margin-right: 5px;
+  vertical-align: 0;
+}
+.legend__swatch--download { background: rgba(110,142,241,.55); }
+.legend__swatch--upload { background: rgba(67,204,183,.7); }
+.legend__swatch--sessions { background: #ff686b; border-radius: 50%; }
+
+.peak-chart { position: relative; }
+.chart-tooltip {
+  position: absolute;
+  transform: translateX(-50%);
+  background: #1f2a37;
+  color: #fff;
+  border-radius: var(--radius-md);
+  padding: 9px 12px;
+  font-size: 11.5px;
+  line-height: 1.7;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 4;
+  box-shadow: 0 6px 18px #1e315733;
+}
+.chart-tooltip b { display: block; font-size: 12.5px; margin-bottom: 3px; }
+.chart-tooltip span { display: block; }
+.chart-tooltip i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
+
+/* ==========================================================================
+   Density pass — the console previously ran to 3.3 screens
+   ========================================================================== */
+.stat { height: auto; padding: 18px 20px; }
+.stat div { margin: 10px 0 12px; }
+.stat strong { font-size: 30px; }
+.stat small { padding-top: 10px; }
+.client-card { padding: 20px; }
+.client-grid { gap: 12px; margin-top: 14px; }
+.client-stat { min-height: 0; padding: 15px 16px; }
+.client-stat strong { font-size: 25px; margin: 7px 0 0; }
+.client-divider { margin: 10px 0 8px; }
+.financial-screen { margin-top: 20px; }
+.screen-title { margin: 0 0 13px; }
+.overview-grid { gap: 16px; margin-bottom: 20px; }
+.overview-card { height: auto; padding: 17px 18px; }
+.overview-card b { font-size: 22px; margin-top: 8px; }
+.profit-row { gap: 16px; margin-bottom: 20px; }
+.profit-chip { height: auto; padding: 18px; }
+.profit-chip b { font-size: 23px; margin-top: 14px; }
+.bandwidth-grid { gap: 18px; }
+.band-card { min-height: 0; padding: 22px 24px; }
+.band-row { margin-top: 12px; }

@@ -115,3 +115,49 @@ export function bindFieldInteractions(root) {
     });
   });
 }
+
+// ---------------------------------------------------------------------------
+// Filtering
+// ---------------------------------------------------------------------------
+
+/** A customer counts as online if it checked in within the last half hour. */
+export const isOnline = (customer, now = TODAY) =>
+  Boolean(customer.lastOnline) && (now - customer.lastOnline) < 30 * 60_000;
+
+/**
+ * Shared predicate behind the Customers filter pills and every linked figure
+ * on the dashboard, so a stat and the list it opens can never disagree.
+ *
+ * `deactivated`, `left` and `blocked` have no representation in the mock data
+ * set, so they legitimately match nothing and surface the empty state.
+ */
+export function matchesFilter(customer, key, now = TODAY) {
+  const status = customerStatus(customer, now);
+  switch (key) {
+    case 'all': return true;
+    case 'active': return status.key === 'active';
+    case 'expiring': return status.key === 'expiring';
+    case 'expired': return status.key === 'expired';
+    case 'online': return isOnline(customer, now);
+    case 'offline': return !isOnline(customer, now);
+    case 'due': return customer.due > 0;
+    case 'deactivated':
+    case 'left':
+    case 'blocked': return false;
+    default: return true;
+  }
+}
+
+/** Pill label ⇄ filter key. Order drives the pill row. */
+export const customerFilters = [
+  { key: 'all', label: 'All Customers' },
+  { key: 'active', label: 'Active' },
+  { key: 'online', label: 'Online' },
+  { key: 'offline', label: 'Offline' },
+  { key: 'deactivated', label: 'Deactivated' },
+  { key: 'expiring', label: 'Expiring Soon' },
+  { key: 'expired', label: 'Expired' },
+  { key: 'due', label: 'Has Due' },
+  { key: 'left', label: 'Left' },
+  { key: 'blocked', label: 'Blocked' },
+];

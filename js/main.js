@@ -13,12 +13,18 @@ function navigate(label) {
   window.scrollTo(0, 0);
 
   if (label === 'Dashboard Analytics') {
-    renderDashboardPage(content);
+    renderDashboardPage(content, openCustomers);
   } else if (label === 'Customers') {
-    renderCustomersPage(content, openCustomer);
+    openCustomers();
   }
   // Other sidebar items don't have a page implementation yet; the click
   // still updates the active nav state via renderShell's own handler.
+}
+
+/** @param {string} [filter] filter key a dashboard figure linked through. */
+function openCustomers(filter = 'all') {
+  window.scrollTo(0, 0);
+  renderCustomersPage(content, openCustomer, filter);
 }
 
 function openCustomer(customer) {
@@ -27,4 +33,4 @@ function openCustomer(customer) {
 }
 
 const content = renderShell(navigate);
-renderDashboardPage(content);
+renderDashboardPage(content, openCustomers);

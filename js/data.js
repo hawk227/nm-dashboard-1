@@ -31,24 +31,26 @@ export const chipIcons = {
   user: 'user',
 };
 
-// [label, value, delta text, delta tone, footnote]
+// [label, value, delta text, delta tone, footnote, filter key or null]
+// A filter key turns the card into a link that opens Customers already
+// narrowed to the set the figure describes.
 export const topStats = [
-  ["Today's Collection", '৳600', '^ ৳320 today', 'good', 'July 1 – July 5, 2026'],
-  ['Outstanding Dues', '৳5,560', 'v 12 overdue', 'bad', 'July 1 – July 5, 2026'],
-  ['Bill Paid Clients', '294 / 495', '^ 59%', 'good', '201 clients not paid'],
-  ['Cash Due', '৳5,560', 'v 12 overdue', 'bad', '12 clients owe cash'],
+  ["Today's Collection", '৳600', '^ ৳320 today', 'good', 'July 1 – July 5, 2026', null],
+  ['Outstanding Dues', '৳5,560', 'v 12 overdue', 'bad', 'Customers carrying a balance', 'due'],
+  ['Bill Paid Clients', '294 / 495', '^ 59%', 'good', 'Accounts currently active', 'active'],
+  ['Cash Due', '৳5,560', 'v 12 overdue', 'bad', 'Customers who owe cash', 'due'],
 ];
 
-// [label, value, inline tone, inline text, footnote tone, footnote text]
+// [label, value, inline tone, inline text, footnote tone, footnote text, filter]
 export const clientSegments = [
-  ['Active', '294', 'good', '^ 59%', '', 'of total clients'],
-  ['Online', '221', 'blue', '^ 74%', '', 'of active clients'],
-  ['New', '2', 'good', 'this month', '', 'July 2026'],
-  ['Renewed', '47', 'teal', 'this month', '', 'July 2026'],
-  ['Offline', '73', '', '', 'yellow', 'v 6 vs yesterday'],
-  ['Expired', '201', '', '', 'red', '৳201K recovery potential'],
-  ['Waiver', '40', '', '', '', 'active discounts'],
-  ['Deactivated', '0', '', '', 'good', 'All clear ✓'],
+  ['Active', '294', 'good', '^ 59%', '', 'of total clients', 'active'],
+  ['Online', '221', 'blue', '^ 74%', '', 'of active clients', 'online'],
+  ['New', '2', 'good', 'this month', '', 'July 2026', null],
+  ['Renewed', '47', 'teal', 'this month', '', 'July 2026', null],
+  ['Offline', '73', '', '', 'yellow', 'v 6 vs yesterday', 'offline'],
+  ['Expired', '201', '', '', 'red', '৳201K recovery potential', 'expired'],
+  ['Waiver', '40', '', '', '', 'active discounts', null],
+  ['Deactivated', '0', '', '', 'good', 'All clear ✓', 'deactivated'],
 ];
 
 export const financialOverview = [
@@ -91,16 +93,16 @@ export const topBandwidthCustomers = [
 ];
 
 export const attentionGroups = [
-  ['Expiring soon', 'yellow', [
+  ['Expiring soon', 'warning', 'expiring', [
     ['ANM2017', '10 Mbps · 1d left', 'Renew'],
     ['ANM2185', '20 Mbps · 2d left', 'Renew'],
     ['ANM2138', '10 Mbps · 3d left', 'Renew'],
   ]],
-  ['Overdue', 'red', [
+  ['Overdue', 'danger', 'due', [
     ['ANM2260', 'Due: ৳850.00', 'Remind'],
     ['ANM2211', 'Due: ৳1,200.00', 'Remind'],
   ]],
-  ['Pending activation', 'blue', [
+  ['Pending activation', 'info', null, [
     ['ANM2301', 'Waiting 2 days ago', 'Activate'],
   ]],
 ];
