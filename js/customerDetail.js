@@ -295,6 +295,11 @@ export function renderCustomerDetailPage(content, customer, onNavigate) {
             </div>
           </div>
         </div>
+
+        <div class="detail-head__aside">
+          <button class="btn btn--ghost" data-action="send-sms">${icon('message-square', 15)} Send SMS</button>
+          <button class="btn btn--ghost" data-action="edit">${icon('pencil', 15)} Edit User</button>
+        </div>
       </div>
 
       <div class="diag-row">

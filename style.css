@@ -1175,6 +1175,16 @@ header {
 }
 .identity__meta .dot { color: var(--color-border-strong); }
 
+/* Secondary actions fill the space beside the identity block. */
+.detail-head__aside {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-left: auto;
+  align-self: flex-start;
+  flex-wrap: wrap;
+}
+
 /* Status sits with the name it describes, not floated to the far edge. */
 .identity__status {
   display: flex;

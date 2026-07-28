@@ -308,17 +308,9 @@ export const actionGroups = [
     title: 'Account',
     icon: 'user',
     actions: [
-      { id: 'edit', icon: 'pencil', label: 'Edit Customer', variant: 'neutral' },
       { id: 'copy-customer', icon: 'copy', label: 'Duplicate', variant: 'neutral' },
       { id: 'change-pppoe', icon: 'id-card', label: 'Change PPPoE', variant: 'neutral' },
       { id: 'change-profile', icon: 'package', label: 'Change Profile', variant: 'neutral' },
-    ],
-  },
-  {
-    title: 'Support',
-    icon: 'message-square',
-    actions: [
-      { id: 'send-sms', icon: 'message-square', label: 'Send SMS', variant: 'neutral' },
     ],
   },
   {
