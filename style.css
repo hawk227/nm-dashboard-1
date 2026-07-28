@@ -1710,39 +1710,6 @@ header {
 .stat--link:focus-visible, .client-stat--link:focus-visible { outline: 2px solid var(--color-info); outline-offset: 2px; }
 
 /* ==========================================================================
-   Profit breakdown table — replaces four cards of `X − 0 = X`
-   ========================================================================== */
-.breakdown-table-wrap { padding: 0; overflow: hidden; }
-.breakdown-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.breakdown-table th {
-  text-align: left;
-  padding: 12px 18px;
-  background: #f6f8fb;
-  font-weight: 800;
-  color: #2a3444;
-  border-bottom: 1px solid var(--color-border);
-  font-size: 12px;
-}
-.breakdown-table td { padding: 13px 18px; border-bottom: 1px solid #f3f5f8; }
-.breakdown-table tr:last-child td { border-bottom: 0; }
-.breakdown-table .num { text-align: right; font-variant-numeric: tabular-nums; }
-.breakdown-table .num--total { font-weight: 800; color: var(--color-primary-dark); }
-.breakdown__source { font-weight: 700; white-space: nowrap; }
-.breakdown__icon {
-  display: inline-grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 7px;
-  background: #f1f7ff;
-  margin-right: 8px;
-  vertical-align: -8px;
-}
-.breakdown__icon .mini-icon { color: var(--color-primary-dark); }
-.breakdown__icon.green { background: #effcf5; }
-.breakdown__icon.green .mini-icon { color: #25c87b; }
-
-/* ==========================================================================
    Bandwidth bars — one hue; length already encodes the value, so colour
    no longer varies arbitrarily per row.
    ========================================================================== */
@@ -1803,3 +1770,40 @@ header {
 .bandwidth-grid { gap: 18px; }
 .band-card { min-height: 0; padding: 22px 24px; }
 .band-row { margin-top: 12px; }
+
+/* ==========================================================================
+   Profit breakdown cards — original layout, tightened. The icon moves onto
+   the title row so each card loses a whole band of vertical space, and the
+   spacing between the two lines and the total is roughly halved.
+   ========================================================================== */
+.breakdown-grid { gap: 16px; }
+.detail-card {
+  min-height: 0;
+  padding: 16px 18px;
+  border-left-width: 3px;
+}
+.detail-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.detail-card__head h3 { font-size: 15px; color: #1a2632; letter-spacing: -.3px; }
+/* The icon sat absolutely positioned in the corner, forcing tall cards. */
+.detail-card .detail-icon {
+  position: static;
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 8px;
+  flex: 0 0 30px;
+}
+.detail-line { font-size: 12.5px; margin-top: 11px; align-items: baseline; gap: 14px; }
+.detail-line span { min-width: 0; }
+.detail-line b { white-space: nowrap; font-weight: 700; color: var(--text-body); }
+.detail-rule { margin: 13px 0 0; }
+.detail-total { margin-top: 12px; font-size: 13px; }
+.detail-total b { font-size: 20px; }

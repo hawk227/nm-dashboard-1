@@ -119,16 +119,17 @@ function renderFinancialOverview() {
       <small>${footnote}</small>
     </div>`).join('');
 
-  // One table instead of four cards each computing `X − 0 = X`; the same
-  // eight figures compare far more easily down a column.
-  const breakdownRows = profitBreakdown.map(([title, lineLabel, lineValue, totalLabel, totalValue, tone, iconKey]) => `
-    <tr>
-      <td class="breakdown__source"><span class="breakdown__icon ${tone}">${chip(iconKey, 16)}</span> ${title}</td>
-      <td class="muted">${lineLabel}</td>
-      <td class="num${zeroClass(lineValue)}">${lineValue}</td>
-      <td class="num is-zero">৳0.00</td>
-      <td class="num num--total${zeroClass(totalValue)}">${totalValue}</td>
-    </tr>`).join('');
+  const breakdownCards = profitBreakdown.map(([title, lineLabel, lineValue, totalLabel, totalValue, tone, iconKey]) => `
+    <div class="detail-card ${tone}">
+      <div class="detail-card__head">
+        <h3>${title}</h3>
+        <span class="detail-icon">${chip(iconKey, 16)}</span>
+      </div>
+      <div class="detail-line"><span>${lineLabel}</span><b class="${zeroClass(lineValue).trim()}">${lineValue}</b></div>
+      <div class="detail-line"><span>Manager package buying cost</span><b class="is-zero">৳0.00</b></div>
+      <div class="detail-rule"></div>
+      <div class="detail-total"><span>${totalLabel}</span><b class="${zeroClass(totalValue).trim()}">${totalValue}</b></div>
+    </div>`).join('');
 
   const maxBandwidth = Math.max(...topBandwidthCustomers.map(([, , , percent]) => percent));
   const bandRows = topBandwidthCustomers.map(([id, size, , percent]) => `
@@ -148,14 +149,7 @@ function renderFinancialOverview() {
       <div class="profit-row">${profitChips}</div>
 
       <div class="screen-title">Profit breakdown</div>
-      <section class="card breakdown-table-wrap">
-        <table class="breakdown-table">
-          <thead>
-            <tr><th>Source</th><th>Received from</th><th class="num">Amount</th><th class="num">Buying cost</th><th class="num">Net profit</th></tr>
-          </thead>
-          <tbody>${breakdownRows}</tbody>
-        </table>
-      </section>
+      <div class="breakdown-grid">${breakdownCards}</div>
 
       <div class="screen-title">Bandwidth detail</div>
       <div class="bandwidth-grid">
