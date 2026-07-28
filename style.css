@@ -1175,11 +1175,12 @@ header {
 }
 .identity__meta .dot { color: var(--color-border-strong); }
 
-.detail-head__status {
+/* Status sits with the name it describes, not floated to the far edge. */
+.identity__status {
   display: flex;
   align-items: center;
-  gap: 9px;
-  margin-left: auto;
+  gap: 8px;
+  margin-top: 9px;
   flex-wrap: wrap;
 }
 

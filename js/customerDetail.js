@@ -289,12 +289,11 @@ export function renderCustomerDetailPage(content, customer, onNavigate) {
               ${copyable(customer.pppoe, 'PPPoE username')}
               <span class="dot">·</span> Client ID ${customer.clientId}
             </p>
+            <div class="identity__status">
+              <span class="pill pill--${status.tone}">${icon(status.icon, 13)} ${status.label}</span>
+              <span class="pill pill--muted" id="link-state">${icon('circle', 10)} Offline</span>
+            </div>
           </div>
-        </div>
-
-        <div class="detail-head__status">
-          <span class="pill pill--${status.tone}">${icon(status.icon, 13)} ${status.label}</span>
-          <span class="pill pill--muted" id="link-state">${icon('circle', 10)} Offline</span>
         </div>
       </div>
 
