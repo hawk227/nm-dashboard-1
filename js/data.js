@@ -284,7 +284,8 @@ export const customers = [
  */
 export const primaryActions = [
   { id: 'cash-renew', icon: 'refresh-cw', label: 'Cash Renew', variant: 'primary' },
-  { id: 'wallet-renew', icon: 'wallet', label: 'Wallet Renew', variant: 'success', requiresWalletCover: true },
+  { id: 'wallet-renew', icon: 'wallet', label: 'Wallet Renew', variant: 'neutral', requiresWalletCover: true },
+  { id: 'add-payment', icon: 'credit-card', label: 'Add Payment', variant: 'success' },
   { id: 'extend-expiry', icon: 'calendar', label: 'Extend Expiry', variant: 'neutral' },
   { id: 'create-ticket', icon: 'ticket', label: 'Create Ticket', variant: 'neutral' },
 ];
@@ -299,7 +300,6 @@ export const actionGroups = [
     title: 'Billing',
     icon: 'wallet',
     actions: [
-      { id: 'add-payment', icon: 'credit-card', label: 'Add Payment', variant: 'neutral' },
       { id: 'wallet-withdraw', icon: 'wallet', label: 'Wallet Withdraw', variant: 'warning' },
       { id: 'adjust-due', icon: 'scale', label: 'Adjust Due', variant: 'warning' },
     ],
