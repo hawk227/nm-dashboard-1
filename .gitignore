@@ -1,0 +1,15 @@
+# Local tooling
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Dependencies / build output (if tooling is added later)
+node_modules/
+dist/
