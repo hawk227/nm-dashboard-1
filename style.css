@@ -1175,7 +1175,7 @@ header {
 }
 .identity__meta .dot { color: var(--color-border-strong); }
 
-.detail-head__actions {
+.detail-head__status {
   display: flex;
   align-items: center;
   gap: 9px;
@@ -1183,12 +1183,24 @@ header {
   flex-wrap: wrap;
 }
 
+/* Promoted actions get their own row so the identity line stays scannable. */
+.action-bar {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  padding: 16px 0 2px;
+  border-top: 1px solid var(--color-border);
+  margin-top: 16px;
+}
+.action-bar .action-menu-wrap { margin-left: auto; }
+
 /* Diagnostics strip — always states when it last ran. */
 .diag-row {
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 14px 0 2px;
+  padding: 10px 0 2px;
   flex-wrap: wrap;
 }
 .diag-row__stamp { font-size: 12px; color: var(--text-faint); margin-left: 4px; }

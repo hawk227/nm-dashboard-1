@@ -32,6 +32,21 @@ const field = (label, value, { wide = false } = {}) =>
 /** A definition row inside a connection group. */
 const row = (label, value) => `<div class="info-row"><span>${label}</span><b>${orNotSet(value)}</b></div>`;
 
+/**
+ * A promoted action. Anything that cannot succeed right now is disabled with
+ * the reason in its tooltip, rather than failing after the click.
+ */
+function primaryButton(action, customer) {
+  const shortOnWallet = action.requiresWalletCover && customer.wallet < customer.price;
+  const reason = shortOnWallet
+    ? `Wallet balance (${formatCurrency(customer.wallet)}) does not cover the ${formatCurrency(customer.price)} renewal price`
+    : '';
+  return `<button class="btn btn--${action.variant}" data-action="${action.id}"
+    ${shortOnWallet ? 'disabled' : ''}${reason ? ` title="${reason}"` : ''}>
+    ${icon(action.icon, 15)} ${action.label}
+  </button>`;
+}
+
 function statusBanner(status, customer) {
   if (status.key === 'active') return '';
   const action = status.key === 'expired' ? 'Renew now' : 'Renew early';
@@ -42,7 +57,7 @@ function statusBanner(status, customer) {
         <strong>${status.detail}</strong>
         <span>Expired on ${formatDateTime(customer.expiresAt)}${customer.due > 0 ? ` · ${formatCurrency(customer.due)} outstanding` : ''}</span>
       </div>
-      <button class="btn btn--primary" data-action="renew">${icon('refresh-cw', 15)} ${action}</button>
+      <button class="btn btn--primary" data-action="cash-renew">${icon('refresh-cw', 15)} ${action}</button>
     </div>`;
 }
 
@@ -277,22 +292,25 @@ export function renderCustomerDetailPage(content, customer, onNavigate) {
           </div>
         </div>
 
-        <div class="detail-head__actions">
+        <div class="detail-head__status">
           <span class="pill pill--${status.tone}">${icon(status.icon, 13)} ${status.label}</span>
           <span class="pill pill--muted" id="link-state">${icon('circle', 10)} Offline</span>
-          ${primaryActions.map((a) => `<button class="btn btn--${a.variant}" data-action="${a.id}">${icon(a.icon, 15)} ${a.label}</button>`).join('')}
-          <div class="action-menu-wrap">
-            <button class="btn btn--ghost" id="more-toggle" aria-haspopup="true" aria-expanded="false">${icon('ellipsis', 16)} More</button>
-            <div class="action-menu" id="more-menu" hidden>
-              ${actionGroups.map((group) => `
-                <div class="action-menu__group${group.danger ? ' menu__group--danger' : ''}">
-                  <p class="action-menu__title">${group.title}</p>
-                  ${group.actions.map((a) => `
-                    <button class="action-menu__item action-menu__item--${a.variant}" data-action="${a.id}">
-                      ${icon(a.icon, 15)} ${a.label}
-                    </button>`).join('')}
-                </div>`).join('')}
-            </div>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        ${primaryActions.map((action) => primaryButton(action, customer)).join('')}
+        <div class="action-menu-wrap">
+          <button class="btn btn--ghost" id="more-toggle" aria-haspopup="true" aria-expanded="false">${icon('ellipsis', 16)} More</button>
+          <div class="action-menu" id="more-menu" hidden>
+            ${actionGroups.map((group) => `
+              <div class="action-menu__group${group.danger ? ' action-menu__group--danger' : ''}">
+                <p class="action-menu__title">${group.title}</p>
+                ${group.actions.map((a) => `
+                  <button class="action-menu__item action-menu__item--${a.variant}" data-action="${a.id}">
+                    ${icon(a.icon, 15)} ${a.label}
+                  </button>`).join('')}
+              </div>`).join('')}
           </div>
         </div>
       </div>

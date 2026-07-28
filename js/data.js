@@ -276,10 +276,17 @@ export const customers = [
   },
 ];
 
-// Actions the operator reaches for constantly — always visible, never buried.
+/**
+ * Actions the operator reaches for constantly — always visible, never buried.
+ * `requiresWalletCover` marks an action that can't complete unless the wallet
+ * covers the renewal price, so it can be disabled with a reason instead of
+ * failing after the click.
+ */
 export const primaryActions = [
-  { id: 'renew', icon: 'refresh-cw', label: 'Renew', variant: 'primary' },
-  { id: 'add-payment', icon: 'wallet', label: 'Add Payment', variant: 'success' },
+  { id: 'cash-renew', icon: 'refresh-cw', label: 'Cash Renew', variant: 'primary' },
+  { id: 'wallet-renew', icon: 'wallet', label: 'Wallet Renew', variant: 'success', requiresWalletCover: true },
+  { id: 'extend-expiry', icon: 'calendar', label: 'Extend Expiry', variant: 'neutral' },
+  { id: 'create-ticket', icon: 'ticket', label: 'Create Ticket', variant: 'neutral' },
 ];
 
 /**
@@ -292,9 +299,7 @@ export const actionGroups = [
     title: 'Billing',
     icon: 'wallet',
     actions: [
-      { id: 'cash-renew', icon: 'refresh-cw', label: 'Cash Renew', variant: 'neutral' },
-      { id: 'wallet-renew', icon: 'credit-card', label: 'Wallet Renew', variant: 'neutral' },
-      { id: 'extend-expiry', icon: 'calendar', label: 'Extend Expiry', variant: 'neutral' },
+      { id: 'add-payment', icon: 'credit-card', label: 'Add Payment', variant: 'neutral' },
       { id: 'wallet-withdraw', icon: 'wallet', label: 'Wallet Withdraw', variant: 'warning' },
       { id: 'adjust-due', icon: 'scale', label: 'Adjust Due', variant: 'warning' },
     ],
@@ -313,7 +318,6 @@ export const actionGroups = [
     title: 'Support',
     icon: 'message-square',
     actions: [
-      { id: 'create-ticket', icon: 'ticket', label: 'Create Ticket', variant: 'neutral' },
       { id: 'send-sms', icon: 'message-square', label: 'Send SMS', variant: 'neutral' },
     ],
   },
