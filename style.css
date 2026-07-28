@@ -1760,7 +1760,11 @@ header {
 .client-stat strong { font-size: 25px; margin: 7px 0 0; }
 .client-divider { margin: 10px 0 8px; }
 .financial-screen { margin-top: 20px; }
-.screen-title { margin: 0 0 13px; }
+/* Space each section from whatever precedes it, rather than relying on every
+   preceding block to set its own bottom margin — one of them did not, and its
+   heading collided with the cards above. */
+.screen-title { margin: 26px 0 13px; }
+.financial-screen > .screen-title:first-child { margin-top: 0; }
 .overview-grid { gap: 16px; margin-bottom: 20px; }
 .overview-card { height: auto; padding: 17px 18px; }
 .overview-card b { font-size: 22px; margin-top: 8px; }
