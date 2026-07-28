@@ -298,6 +298,13 @@ export function renderCustomerDetailPage(content, customer, onNavigate) {
         </div>
       </div>
 
+      <div class="diag-row">
+        <button class="btn btn--ghost btn--sm" data-diagnostic="refresh">${icon('refresh-cw', 14)} Refresh</button>
+        <button class="btn btn--ghost btn--sm" data-diagnostic="live">${icon('zap', 14)} Go Live</button>
+        <button class="btn btn--ghost btn--sm" data-diagnostic="power">${icon('zap', 14)} Check Power</button>
+        <span class="diag-row__stamp" id="diag-stamp">Not checked yet</span>
+      </div>
+
       <div class="action-bar">
         ${primaryActions.map((action) => primaryButton(action, customer)).join('')}
         <div class="action-menu-wrap">
@@ -313,13 +320,6 @@ export function renderCustomerDetailPage(content, customer, onNavigate) {
               </div>`).join('')}
           </div>
         </div>
-      </div>
-
-      <div class="diag-row">
-        <button class="btn btn--ghost btn--sm" data-diagnostic="refresh">${icon('refresh-cw', 14)} Refresh</button>
-        <button class="btn btn--ghost btn--sm" data-diagnostic="live">${icon('zap', 14)} Go Live</button>
-        <button class="btn btn--ghost btn--sm" data-diagnostic="power">${icon('zap', 14)} Check Power</button>
-        <span class="diag-row__stamp" id="diag-stamp">Not checked yet</span>
       </div>
 
       <div class="tabs" role="tablist">
