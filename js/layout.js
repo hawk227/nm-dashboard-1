@@ -20,7 +20,7 @@ function renderNavLink(item, index) {
 const shellHTML = `
 <div class="dashboard">
   <aside class="sidebar">
-    <img src="/assets/03af2b9b7a10d803.svg" class="logo" alt="Net Manager">
+    <img src="/assets/logo.svg" class="logo" alt="Net Manager">
     <div class="nav-label">DASHBOARD</div>
     <nav>${sidebarNav.slice(0, 5).map(renderNavLink).join('')}</nav>
     <div class="nav-label second">ISP MANAGER</div>
