@@ -282,12 +282,15 @@ export const customers = [
  * Actions the operator reaches for constantly — always visible, never buried.
  * `requiresWalletCover` marks an action that can't complete unless the wallet
  * covers the renewal price, so it can be disabled with a reason instead of
- * failing after the click.
+ * failing after the click. `startsGroup` draws a rule before the action: the
+ * renewals sit left of it, everything else right, so grouping carries the
+ * meaning that colour used to. Only one action here is filled — the rest are
+ * outlined, because two filled buttons in a row means neither reads as primary.
  */
 export const primaryActions = [
   { id: 'cash-renew', icon: 'refresh-cw', label: 'Cash Renew', variant: 'primary' },
   { id: 'wallet-renew', icon: 'wallet', label: 'Wallet Renew', variant: 'neutral', requiresWalletCover: true },
-  { id: 'add-payment', icon: 'credit-card', label: 'Add Payment', variant: 'success' },
+  { id: 'add-payment', icon: 'credit-card', label: 'Add Payment', variant: 'neutral', startsGroup: true },
   { id: 'extend-expiry', icon: 'calendar', label: 'Extend Expiry', variant: 'neutral' },
   { id: 'create-ticket', icon: 'ticket', label: 'Create Ticket', variant: 'neutral' },
 ];

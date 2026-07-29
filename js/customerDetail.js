@@ -41,7 +41,8 @@ function primaryButton(action, customer) {
   const reason = shortOnWallet
     ? `Wallet balance (${formatCurrency(customer.wallet)}) does not cover the ${formatCurrency(customer.price)} renewal price`
     : '';
-  return `<button class="btn btn--${action.variant}" data-action="${action.id}"
+  return `${action.startsGroup ? '<span class="action-bar__sep" aria-hidden="true"></span>' : ''}
+  <button class="btn btn--${action.variant}" data-action="${action.id}"
     ${shortOnWallet ? 'disabled' : ''}${reason ? ` title="${reason}"` : ''}>
     ${icon(action.icon, 15)} ${action.label}
   </button>`;
