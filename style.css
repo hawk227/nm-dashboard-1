@@ -1699,21 +1699,6 @@ header {
 .confirm .btn--danger .mini-icon { color: #fff; }
 .confirm .btn[disabled] { background: #e9ecf1; color: var(--text-faint); }
 
-/* Explains a disabled action in the page itself, where a tooltip cannot go. */
-.action-note {
-  display: flex;
-  align-items: flex-start;
-  gap: 9px;
-  margin: 12px 0 0;
-  padding: 12px 14px;
-  border-radius: var(--radius-md);
-  background: #fdf6e9;
-  border: 1px solid #f3e0be;
-  color: #7a5a17;
-  font-size: 14.5px;
-  line-height: 21px;
-}
-.action-note .mini-icon { color: #b5821f; flex: 0 0 auto; margin-top: 2px; }
 
 /* ==========================================================================
    Zero states — a figure of zero is the absence of news, so it recedes

@@ -45,28 +45,18 @@ const isShortOnWallet = (action, customer) =>
 
 /**
  * A promoted action. Anything that cannot succeed right now is disabled rather
- * than failing after the click; the reason is printed under the bar by
- * `disabledNote` instead of hidden in a tooltip, which never appears on touch
- * and never appears at all for someone who doesn't know to hover.
+ * than failing after the click, with the reason on the button itself.
  */
 function primaryButton(action, customer) {
+  const blocked = isShortOnWallet(action, customer);
+  const reason = blocked
+    ? `Wallet has ${formatCurrency(customer.wallet)} and this package costs ${formatCurrency(customer.price)}`
+    : '';
   return `${action.startsGroup ? '<span class="action-bar__sep" aria-hidden="true"></span>' : ''}
   <button class="btn btn--${action.variant}" data-action="${action.id}"
-    ${isShortOnWallet(action, customer) ? 'disabled' : ''}>
+    ${blocked ? `disabled title="${reason}"` : ''}>
     ${icon(action.icon, 15)} ${action.label}
   </button>`;
-}
-
-/** Spells out, in the page itself, why a greyed-out button is greyed out. */
-function disabledNote(customer) {
-  const blocked = primaryActions.filter((action) => isShortOnWallet(action, customer));
-  if (blocked.length === 0) return '';
-  return `
-    <p class="action-note">${icon('circle-alert', 15)}
-      <span><b>${blocked.map((a) => a.label).join(' and ')}</b> is off because the wallet
-      has ${formatCurrency(customer.wallet)} and this package costs
-      ${formatCurrency(customer.price)}. Take cash instead, or add money to the wallet first.</span>
-    </p>`;
 }
 
 /**
@@ -402,7 +392,6 @@ export function renderCustomerDetailPage(content, customer, onNavigate) {
           </div>
         </div>
       </div>
-      ${disabledNote(customer)}
 
       <div class="tabs" role="tablist">
         ${TABS.map((tab) => `
