@@ -29,24 +29,100 @@ let activeTab = 'overview';
 const field = (label, value, { wide = false } = {}) =>
   `<div class="field-box${wide ? ' span-2' : ''}"><span>${label}</span><b>${orNotSet(value)}</b></div>`;
 
-/** A definition row inside a connection group. */
-const row = (label, value) => `<div class="info-row"><span>${label}</span><b>${orNotSet(value)}</b></div>`;
+/**
+ * A definition row inside a connection group. `hint` explains a technical
+ * label in plain words for operators who don't already know the term.
+ */
+const row = (label, value, hint = '') => `
+  <div class="info-row">
+    <span>${label}${hint ? `<small class="info-row__hint">${hint}</small>` : ''}</span>
+    <b>${orNotSet(value)}</b>
+  </div>`;
+
+/** True when an action cannot complete because the wallet is short. */
+const isShortOnWallet = (action, customer) =>
+  Boolean(action.requiresWalletCover) && customer.wallet < customer.price;
 
 /**
- * A promoted action. Anything that cannot succeed right now is disabled with
- * the reason in its tooltip, rather than failing after the click.
+ * A promoted action. Anything that cannot succeed right now is disabled rather
+ * than failing after the click; the reason is printed under the bar by
+ * `disabledNote` instead of hidden in a tooltip, which never appears on touch
+ * and never appears at all for someone who doesn't know to hover.
  */
 function primaryButton(action, customer) {
-  const shortOnWallet = action.requiresWalletCover && customer.wallet < customer.price;
-  const reason = shortOnWallet
-    ? `Wallet balance (${formatCurrency(customer.wallet)}) does not cover the ${formatCurrency(customer.price)} renewal price`
-    : '';
   return `${action.startsGroup ? '<span class="action-bar__sep" aria-hidden="true"></span>' : ''}
   <button class="btn btn--${action.variant}" data-action="${action.id}"
-    ${shortOnWallet ? 'disabled' : ''}${reason ? ` title="${reason}"` : ''}>
+    ${isShortOnWallet(action, customer) ? 'disabled' : ''}>
     ${icon(action.icon, 15)} ${action.label}
   </button>`;
 }
+
+/** Spells out, in the page itself, why a greyed-out button is greyed out. */
+function disabledNote(customer) {
+  const blocked = primaryActions.filter((action) => isShortOnWallet(action, customer));
+  if (blocked.length === 0) return '';
+  return `
+    <p class="action-note">${icon('circle-alert', 15)}
+      <span><b>${blocked.map((a) => a.label).join(' and ')}</b> is off because the wallet
+      has ${formatCurrency(customer.wallet)} and this package costs
+      ${formatCurrency(customer.price)}. Take cash instead, or add money to the wallet first.</span>
+    </p>`;
+}
+
+/**
+ * Actions that move money or destroy data ask first, in plain words, naming
+ * the customer and the amount. Anything absent from here is safe enough to
+ * fire on a single click. `confirm` is the button label — it repeats the verb
+ * so the choice is readable without the question above it.
+ */
+const CONFIRMATIONS = {
+  'cash-renew': (c) => ({
+    title: 'Take cash and renew?',
+    body: `Collect <b>${formatCurrency(c.price)}</b> in cash from <b>${c.name}</b> and renew the line for ${c.durationDays} days.`,
+    confirm: 'Yes, take cash and renew',
+  }),
+  'wallet-renew': (c) => ({
+    title: 'Pay from wallet and renew?',
+    body: `Take <b>${formatCurrency(c.price)}</b> out of ${c.name}’s wallet and renew the line for ${c.durationDays} days.`,
+    confirm: 'Yes, pay from wallet',
+  }),
+  'add-payment': (c) => ({
+    title: 'Add a payment?',
+    body: `Record money received from <b>${c.name}</b>. This changes their balance.`,
+    confirm: 'Yes, add payment',
+  }),
+  'wallet-withdraw': (c) => ({
+    title: 'Take money out of the wallet?',
+    body: `The wallet holds <b>${formatCurrency(c.wallet)}</b>. Money taken out cannot be put back automatically.`,
+    confirm: 'Yes, withdraw',
+    tone: 'warning',
+  }),
+  'adjust-due': (c) => ({
+    title: 'Change the amount owed?',
+    body: `<b>${c.name}</b> currently owes <b>${formatCurrency(c.due)}</b>. Changing it affects what you can collect.`,
+    confirm: 'Yes, change the due',
+    tone: 'warning',
+  }),
+  deactivate: (c) => ({
+    title: 'Turn off this connection?',
+    body: `<b>${c.name}</b> will lose internet straight away. You can turn it back on later.`,
+    confirm: 'Yes, turn it off',
+    tone: 'danger',
+  }),
+  'left-client': (c) => ({
+    title: 'Mark this customer as left?',
+    body: `<b>${c.name}</b> will be moved out of your active customer list.`,
+    confirm: 'Yes, mark as left',
+    tone: 'warning',
+  }),
+  delete: (c) => ({
+    title: 'Delete this customer for good?',
+    body: `Everything for <b>${c.name}</b> — payments, history, connection details — is removed. <b>This cannot be undone.</b>`,
+    confirm: 'Yes, delete permanently',
+    tone: 'danger',
+    hold: true,
+  }),
+};
 
 function statusBanner(status, customer) {
   if (status.key === 'active') return '';
@@ -143,33 +219,33 @@ function overviewTab(customer, status) {
 function connectionTab(customer) {
   const groups = [
     ['Credentials', 'id-card', [
-      ['PPPoE username', copyable(customer.pppoe, 'username')],
-      ['Password', secretField(customer.password)],
-      ['Connection type', customer.connectionType],
+      ['PPPoE username', copyable(customer.pppoe, 'username'), 'The name this customer’s connection logs in with'],
+      ['Password', secretField(customer.password), 'The password that goes with the login name'],
+      ['Connection type', customer.connectionType, 'How the line is set up'],
     ]],
     ['Network', 'wifi', [
-      ['IP address', copyable(customer.ip, 'IP address')],
-      ['Gateway', copyable(customer.gateway, 'gateway')],
-      ['Subnet mask', customer.subnet],
+      ['IP address', copyable(customer.ip, 'IP address'), 'This customer’s address on the network'],
+      ['Gateway', copyable(customer.gateway, 'gateway'), 'The router their traffic passes through'],
+      ['Subnet mask', customer.subnet, 'Defines the size of their network block'],
       ['Bandwidth type', customer.bandwidthType],
-      ['Zone', customer.zone],
-      ['Connected NAS', customer.connectedNas],
+      ['Zone', customer.zone, 'Service area this line belongs to'],
+      ['Connected NAS', customer.connectedNas, 'The office router handling this connection'],
     ]],
     ['Hardware', 'server', [
-      ['ONU MAC address', copyable(customer.onuMac, 'MAC address')],
-      ['Initial fiber power', customer.initialFiberPower],
-      ['Recent dB', customer.recentDb],
-      ['Cable length', `${customer.cableLength} m`],
+      ['ONU MAC address', copyable(customer.onuMac, 'MAC address'), 'Serial number of the fiber box in their home'],
+      ['Initial fiber power', customer.initialFiberPower, 'Signal strength measured on install day'],
+      ['Recent dB', customer.recentDb, 'Signal strength now — further from zero is weaker'],
+      ['Cable length', `${customer.cableLength} m`, 'Fiber run from the splitter to their home'],
       ['Cable ID', customer.cableId],
-      ['WiFi router username', customer.wifiRouterUsername],
+      ['WiFi router username', customer.wifiRouterUsername, 'For logging into the WiFi router itself'],
       ['WiFi router password', customer.wifiRouterPassword],
       ['IP phone no.', customer.ipPhoneNo],
     ]],
     ['Ownership', 'user', [
-      ['Manager', customer.manager],
+      ['Manager', customer.manager, 'Staff member responsible for this customer'],
       ['Manager email', `<a class="link" href="mailto:${customer.managerEmail}">${customer.managerEmail}</a>`],
-      ['Joined', formatDateTime(customer.joinedAt)],
-      ['Last updated', formatDateTime(customer.updatedAt)],
+      ['Joined', formatDateTime(customer.joinedAt), 'When this customer first signed up'],
+      ['Last updated', formatDateTime(customer.updatedAt), 'When these details were last changed'],
     ]],
   ];
 
@@ -182,7 +258,7 @@ function connectionTab(customer) {
     ${groups.map(([title, groupIcon, rows]) => `
       <section class="card panel">
         <h2 class="panel__title">${icon(groupIcon, 18)} ${title}</h2>
-        <div class="info-grid">${rows.map(([label, value]) => row(label, value)).join('')}</div>
+        <div class="info-grid">${rows.map(([label, value, hint]) => row(label, value, hint)).join('')}</div>
       </section>`).join('')}
 
     <section class="card panel">
@@ -190,8 +266,8 @@ function connectionTab(customer) {
       <div class="info-grid">
         ${row('Profile name', customer.profile)}
         ${row('Customer price', formatCurrency(customer.price))}
-        ${row('Duration', `${customer.durationDays} days`)}
-        ${row('Pool name', customer.pool)}
+        ${row('Duration', `${customer.durationDays} days`, 'How long one payment keeps the line active')}
+        ${row('Pool name', customer.pool, 'Which block of IP addresses this line draws from')}
         ${row('Download speed', customer.downloadMbps ? `${customer.downloadMbps} Mbps` : null)}
         ${row('Upload speed', customer.uploadMbps ? `${customer.uploadMbps} Mbps` : null)}
       </div>
@@ -281,7 +357,7 @@ export function renderCustomerDetailPage(content, customer, onNavigate) {
       </nav>
 
       <div class="detail-head__main">
-        <button class="btn btn--ghost btn--icon" data-nav="Customers" aria-label="Back to customers">${icon('arrow-left', 18)}</button>
+        <button class="btn btn--ghost" data-nav="Customers">${icon('arrow-left', 18)} Back</button>
         <div class="identity">
           <div class="identity__avatar">${icon('user', 26)}</div>
           <div>
@@ -292,7 +368,7 @@ export function renderCustomerDetailPage(content, customer, onNavigate) {
             </p>
             <div class="identity__status">
               <span class="pill pill--${status.tone}">${icon(status.icon, 13)} ${status.label}</span>
-              <span class="pill pill--muted" id="link-state">${icon('circle', 10)} Offline</span>
+              <span class="pill pill--link-state" id="link-state">${icon('circle', 10)} Offline</span>
             </div>
           </div>
         </div>
@@ -326,6 +402,7 @@ export function renderCustomerDetailPage(content, customer, onNavigate) {
           </div>
         </div>
       </div>
+      ${disabledNote(customer)}
 
       <div class="tabs" role="tablist">
         ${TABS.map((tab) => `
@@ -338,7 +415,25 @@ export function renderCustomerDetailPage(content, customer, onNavigate) {
 
     ${statusBanner(status, customer)}
     <div class="tab-panel" id="tab-panel">${tabPanels[activeTab]()}</div>
-    <div class="toast" id="detail-toast" hidden></div>`;
+
+    <div class="toast" id="detail-toast" role="status" hidden>
+      <span id="detail-toast-text"></span>
+      <button type="button" class="toast__close" id="detail-toast-close">Dismiss</button>
+    </div>
+
+    <dialog class="confirm" id="confirm-dialog" aria-labelledby="confirm-title">
+      <form method="dialog" class="confirm__inner">
+        <h2 class="confirm__title" id="confirm-title"></h2>
+        <p class="confirm__body" id="confirm-body"></p>
+        <label class="confirm__hold" id="confirm-hold" hidden>
+          <input type="checkbox" id="confirm-hold-box"> I understand this cannot be undone
+        </label>
+        <div class="confirm__actions">
+          <button value="cancel" class="btn btn--neutral">No, go back</button>
+          <button value="ok" class="btn btn--primary" id="confirm-ok"></button>
+        </div>
+      </form>
+    </dialog>`;
 
   inlineMiniIcons(content);
   bindFieldInteractions(content);
@@ -346,14 +441,22 @@ export function renderCustomerDetailPage(content, customer, onNavigate) {
 }
 
 function bindPageInteractions(content, customer, tabPanels, onNavigate) {
+  // Feedback stays on screen until it is dismissed. A timed toast is read by
+  // whoever reads fastest; someone slower sees nothing happen and clicks the
+  // button a second time, which is how a customer gets charged twice.
   const toast = content.querySelector('#detail-toast');
-  let toastTimer;
+  const toastText = content.querySelector('#detail-toast-text');
   const notify = (message) => {
-    toast.textContent = message;
+    toastText.textContent = message;
     toast.hidden = false;
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { toast.hidden = true; }, 2400);
   };
+  content.querySelector('#detail-toast-close')
+    .addEventListener('click', () => { toast.hidden = true; });
+
+  const confirmAction = buildConfirm(content, customer);
+  const runAction = (button) => confirmAction(button, () => {
+    notify(`${button.textContent.trim()} — not wired up in this prototype.`);
+  });
 
   // Breadcrumb + back button route through the app's normal navigation.
   content.querySelectorAll('[data-nav]').forEach((el) => el.addEventListener('click', (event) => {
@@ -373,10 +476,10 @@ function bindPageInteractions(content, customer, tabPanels, onNavigate) {
     panel.innerHTML = tabPanels[activeTab]();
     inlineMiniIcons(panel);
     bindFieldInteractions(panel);
-    bindPanelInteractions(panel, customer, notify);
+    bindPanelInteractions(panel, customer, notify, runAction);
   }));
 
-  bindPanelInteractions(panel, customer, notify);
+  bindPanelInteractions(panel, customer, notify, runAction);
 
   // Overflow menu.
   const moreToggle = content.querySelector('#more-toggle');
@@ -392,9 +495,10 @@ function bindPageInteractions(content, customer, tabPanels, onNavigate) {
     moreToggle.setAttribute('aria-expanded', 'false');
   });
 
-  content.querySelectorAll('[data-action]').forEach((button) => button.addEventListener('click', () => {
-    notify(`${button.textContent.trim()} — not wired up in this prototype.`);
-  }));
+  // Scoped to the header: the tab panel has its own binding, and binding both
+  // from here would fire every action twice.
+  content.querySelectorAll('.detail-head [data-action], .status-banner [data-action]')
+    .forEach((button) => button.addEventListener('click', () => runAction(button)));
 
   // Diagnostics report progress and stamp when they last ran, so "Offline"
   // is never shown without saying how fresh it is.
@@ -413,7 +517,7 @@ function bindPageInteractions(content, customer, tabPanels, onNavigate) {
   }));
 }
 
-function bindPanelInteractions(panel, customer, notify) {
+function bindPanelInteractions(panel, customer, notify, runAction) {
   panel.querySelectorAll('.accordion-head:not([disabled])').forEach((head) => head.addEventListener('click', () => {
     const section = head.parentElement;
     const body = section.querySelector('.accordion-body');
@@ -429,7 +533,48 @@ function bindPanelInteractions(panel, customer, notify) {
     });
   }
 
-  panel.querySelectorAll('[data-action]').forEach((button) => button.addEventListener('click', () => {
-    notify(`${button.textContent.trim()} — not wired up in this prototype.`);
-  }));
+  panel.querySelectorAll('[data-action]')
+    .forEach((button) => button.addEventListener('click', () => runAction(button)));
+}
+
+/**
+ * Returns `confirm(button, proceed)`: anything listed in CONFIRMATIONS asks
+ * first, in a native <dialog> so focus, Escape and the backdrop all behave
+ * without us reimplementing them. Everything else runs straight through.
+ */
+function buildConfirm(content, customer) {
+  const dialog = content.querySelector('#confirm-dialog');
+  const titleEl = content.querySelector('#confirm-title');
+  const bodyEl = content.querySelector('#confirm-body');
+  const okEl = content.querySelector('#confirm-ok');
+  const holdEl = content.querySelector('#confirm-hold');
+  const holdBox = content.querySelector('#confirm-hold-box');
+
+  // The checkbox only guards the irreversible ones, so it never becomes a
+  // reflex the operator clicks through without reading.
+  holdBox.addEventListener('change', () => { okEl.disabled = !holdBox.checked; });
+
+  let pending = null;
+  dialog.addEventListener('close', () => {
+    const run = pending;
+    pending = null;
+    if (dialog.returnValue === 'ok' && run) run();
+  });
+
+  return (button, proceed) => {
+    const build = CONFIRMATIONS[button.dataset.action];
+    if (!build) return proceed();
+
+    const spec = build(customer);
+    titleEl.textContent = spec.title;
+    bodyEl.innerHTML = spec.body;
+    okEl.textContent = spec.confirm;
+    okEl.className = `btn btn--${spec.tone === 'danger' ? 'danger' : 'primary'}`;
+    holdEl.hidden = !spec.hold;
+    holdBox.checked = false;
+    okEl.disabled = Boolean(spec.hold);
+    pending = proceed;
+    dialog.showModal();
+    return undefined;
+  };
 }

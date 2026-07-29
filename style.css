@@ -39,8 +39,11 @@ nav a.active .mini-icon { color: #fff; }
   /* Text */
   --text-heading: #141928;
   --text-body: #3c4655;
-  --text-muted: #7c869a;
-  --text-faint: #9aa4b2;
+  /* Both clear 4.5:1 on white (WCAG AA). The operators reading this screen
+     are often elderly, and contrast sensitivity is the first thing to go —
+     nothing here may be lighter than --text-faint. */
+  --text-muted: #5c6678;
+  --text-faint: #6b7484;
 
   /* Surfaces & borders */
   --color-bg: #f4f6fb;
@@ -376,15 +379,15 @@ header {
 .stat { height: 154px; padding: 23px 22px; }
 .stat > span, .client-stat > span, .finance-item span {
   font-size: 13px;
-  color: #8992a0;
+  color: var(--text-muted);
   font-weight: 600;
 }
 .stat div { margin: 14px 0 16px; white-space: nowrap; }
 .stat strong { font-size: 34px; font-weight: 800; letter-spacing: -1.5px; }
 .stat em, .client-stat em { font-size: 13px; font-weight: 700; font-style: normal; margin-left: 8px; }
 .stat small {
-  font-size: 10px;
-  color: #a3aab6;
+  font-size: 13px;
+  color: var(--text-faint);
   display: block;
   border-top: 1px solid #f0f1f3;
   padding-top: 12px;
@@ -426,8 +429,8 @@ header {
 .client-divider { height: 1px; background: #eef0f3; margin: 14px 0 10px; }
 .client-stat small {
   display: block;
-  font-size: 11px;
-  color: #a1a9b4;
+  font-size: 13px;
+  color: var(--text-faint);
   line-height: 16px;
   font-weight: 600;
 }
@@ -1085,8 +1088,11 @@ header {
   gap: 7px;
   border: 1px solid transparent;
   border-radius: var(--radius-md);
-  padding: 9px 15px;
-  font: 700 12.5px var(--font-base);
+  padding: 11px 17px;
+  /* 44px is the accessible minimum (WCAG 2.5.5). Hand tremor and imprecise
+     mousing turn a 36px target into a miss-and-retry. */
+  min-height: 44px;
+  font: 700 14px var(--font-base);
   cursor: pointer;
   white-space: nowrap;
   transition: filter .12s, background .12s, border-color .12s, transform .12s;
@@ -1094,8 +1100,8 @@ header {
 .btn:hover { filter: brightness(1.05); }
 .btn:active { transform: scale(.98); }
 .btn:focus-visible { outline: 2px solid var(--color-info); outline-offset: 2px; }
-.btn--sm { padding: 7px 12px; font-size: 12px; }
-.btn--icon { padding: 8px; }
+.btn--sm { padding: 9px 14px; font-size: 13.5px; }
+.btn--icon { padding: 8px; min-width: 44px; justify-content: center; }
 
 .btn--primary { background: var(--color-primary); color: #fff; }
 .btn--success { background: var(--color-success-dark); color: #fff; }
@@ -1146,6 +1152,16 @@ header {
 .pill--warning { background: #fdf3e2; color: #a5701a; }
 .pill--danger  { background: #fdecec; color: #b53f3a; }
 .pill--muted   { background: #eef0f3; color: var(--text-muted); }
+/* Live link state. A grey fill reads as "disabled control" everywhere else on
+   this page, so connection state gets an outline and a coloured dot instead. */
+.pill--link-state {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  color: var(--text-body);
+}
+.pill--link-state .mini-icon { color: var(--text-faint); fill: currentColor; }
+.pill--link-state.is-online { border-color: #b9e6cd; color: #1c7a49; }
+.pill--link-state.is-online .mini-icon { color: var(--color-success); }
 .pill .mini-icon { color: currentColor; }
 
 .chip {
@@ -1301,7 +1317,7 @@ header {
   border-bottom: 2px solid transparent;
   padding: 12px 16px;
   margin-bottom: -1px;
-  font: 700 13px var(--font-base);
+  font: 700 15px var(--font-base);
   color: var(--text-muted);
   cursor: pointer;
 }
@@ -1323,8 +1339,8 @@ header {
 }
 .status-banner__icon { display: grid; place-items: center; flex: 0 0 auto; }
 .status-banner__text { display: flex; flex-direction: column; gap: 2px; }
-.status-banner__text strong { font-size: 15px; }
-.status-banner__text span { font-size: 12.5px; opacity: .85; }
+.status-banner__text strong { font-size: 17px; }
+.status-banner__text span { font-size: 14.5px; }
 .status-banner .btn { margin-left: auto; }
 
 .status-banner--danger {
@@ -1369,9 +1385,9 @@ header {
   background: #f1f3f7;
   flex: 0 0 34px;
 }
-.summary-tile__label { display: block; font-size: 12px; color: var(--text-muted); font-weight: 600; }
-.summary-tile__value { display: block; font-size: 21px; font-weight: 800; margin: 3px 0 2px; letter-spacing: -.5px; }
-.summary-tile__sub { display: block; font-size: 11.5px; color: var(--text-faint); }
+.summary-tile__label { display: block; font-size: 14px; color: var(--text-muted); font-weight: 600; }
+.summary-tile__value { display: block; font-size: 28px; font-weight: 800; margin: 3px 0 2px; letter-spacing: -.5px; }
+.summary-tile__sub { display: block; font-size: 13.5px; color: var(--text-faint); }
 
 .summary-tile--success { border-left-color: var(--color-success); }
 .summary-tile--success .summary-tile__icon { background: #e8f8ef; }
@@ -1407,8 +1423,8 @@ header {
   border-radius: var(--radius-md);
   padding: 13px 16px;
 }
-.field-box span { display: block; color: var(--text-faint); font-size: 12px; margin-bottom: 6px; }
-.field-box b { font-size: 14.5px; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.field-box span { display: block; color: var(--text-muted); font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.field-box b { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .field-box.span-2 { grid-column: 1 / -1; }
 
 .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2px 32px; }
@@ -1417,15 +1433,28 @@ header {
   align-items: baseline;
   justify-content: space-between;
   gap: 16px;
-  padding: 10px 0;
+  padding: 11px 0;
   border-bottom: 1px solid #f3f5f8;
-  font-size: 13px;
+  font-size: 15px;
 }
-.info-row span { color: var(--text-muted); }
+.info-row > span { color: var(--text-muted); }
 .info-row b { font-weight: 700; text-align: right; }
 
+/* Plain-language gloss under a technical label. The jargon stays — an
+   experienced operator still searches for "ONU MAC" — but nobody has to
+   already know what it means to read the screen. */
+.info-row__hint {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-faint);
+  margin-top: 2px;
+  max-width: 34ch;
+}
+
 /* Missing data is recessed so real values carry the visual weight. */
-.not-set { color: #c3cad4; font-weight: 500; font-style: italic; }
+/* Readable, not decorative: italic grey was the least legible thing here. */
+.not-set { color: var(--text-faint); font-weight: 600; }
 .muted-inline { color: var(--text-faint); font-weight: 500; }
 .amount-danger { color: #b53f3a; }
 
@@ -1442,9 +1471,12 @@ header {
   border: 1px solid transparent;
   background: none;
   border-radius: 6px;
-  padding: 3px;
+  /* 24px clears the AA target minimum (WCAG 2.5.8) without turning an inline
+     value into a toolbar. */
+  min-width: 26px;
+  min-height: 26px;
   cursor: pointer;
-  color: var(--text-faint);
+  color: var(--text-muted);
   position: relative;
 }
 .copy-btn:hover { background: #f1f3f7; color: var(--color-primary); }
@@ -1489,7 +1521,7 @@ header {
   border-radius: var(--radius-md);
   padding: 14px 16px;
 }
-.setting-row b { display: block; font-size: 14px; }
+.setting-row b { display: block; font-size: 16px; }
 .setting-row small { display: block; color: var(--text-muted); font-size: 12px; margin-top: 3px; max-width: 60ch; }
 
 .switch { position: relative; display: inline-block; width: 40px; height: 23px; flex: 0 0 40px; }
@@ -1594,15 +1626,94 @@ header {
   bottom: 26px;
   left: 50%;
   transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 18px;
   background: #1f2a37;
   color: #fff;
-  padding: 12px 18px;
+  padding: 14px 16px 14px 20px;
   border-radius: var(--radius-md);
-  font-size: 12.5px;
+  font-size: 15px;
   font-weight: 600;
   z-index: 20;
+  max-width: min(560px, calc(100vw - 40px));
   box-shadow: 0 8px 24px #1e315733;
 }
+/* Dismissed by hand, never on a timer — see notify() in customerDetail.js. */
+.toast__close {
+  flex: 0 0 auto;
+  min-height: 32px;
+  padding: 6px 12px;
+  border: 1px solid #ffffff59;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: #fff;
+  font: 700 13.5px var(--font-base);
+  cursor: pointer;
+}
+.toast__close:hover { background: #ffffff1f; }
+.toast__close:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* ==========================================================================
+   Confirmation dialog
+   Money and destruction ask first, naming the customer and the amount in
+   plain words. Native <dialog> so focus trapping, Escape and the backdrop
+   come from the platform rather than from us.
+   ========================================================================== */
+.confirm {
+  border: 0;
+  border-radius: var(--radius-xl);
+  padding: 0;
+  width: min(480px, calc(100vw - 32px));
+  box-shadow: 0 24px 60px #14192840;
+  color: var(--text-heading);
+}
+.confirm::backdrop { background: #141928a6; }
+.confirm__inner { padding: 26px 26px 22px; }
+.confirm__title { font-size: 21px; margin: 0 0 10px; }
+.confirm__body { font-size: 16px; line-height: 24px; color: var(--text-body); margin: 0; }
+.confirm__body b { font-weight: 800; color: var(--text-heading); }
+.confirm__hold {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  padding: 12px 14px;
+  border: 1px solid #f0c9c7;
+  border-radius: var(--radius-md);
+  background: #fdf3f3;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.confirm__hold input { width: 20px; height: 20px; accent-color: var(--color-danger-dark); }
+.confirm__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+/* Inside the dialog nothing competes with the confirm button, so the
+   destructive one is filled rather than outlined. */
+.confirm .btn--danger { background: var(--color-danger-dark); color: #fff; border-color: transparent; }
+.confirm .btn--danger .mini-icon { color: #fff; }
+.confirm .btn[disabled] { background: #e9ecf1; color: var(--text-faint); }
+
+/* Explains a disabled action in the page itself, where a tooltip cannot go. */
+.action-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: #fdf6e9;
+  border: 1px solid #f3e0be;
+  color: #7a5a17;
+  font-size: 14.5px;
+  line-height: 21px;
+}
+.action-note .mini-icon { color: #b5821f; flex: 0 0 auto; margin-top: 2px; }
 
 /* ==========================================================================
    Zero states — a figure of zero is the absence of news, so it recedes
